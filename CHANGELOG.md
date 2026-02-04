@@ -8,6 +8,37 @@ All notable changes to Dex will be documented in this file.
 
 ## [Unreleased]
 
+### 🤖 AI Model Flexibility: Budget Cloud & Offline Mode
+
+**What was frustrating:** Dex only worked with Claude, which costs money and requires internet. Heavy users faced high API bills, and travelers couldn't use Dex on planes or trains.
+
+**What's new:** Two new ways to use Dex:
+
+1. **Budget Cloud Mode** — Use cheaper AI models like Kimi K2.5 or DeepSeek when online
+   - Save 80-97% on API costs for routine tasks
+   - Requires ~$5-10 upfront via OpenRouter
+   - Quality is great for daily tasks (summaries, planning, task management)
+
+2. **Offline Mode** — Download an AI to run locally on your computer
+   - Works on planes, trains, anywhere without internet
+   - Completely free forever
+   - Requires 8GB+ RAM (16GB+ recommended)
+
+3. **Smart Routing** — Let Dex automatically pick the best model
+   - Claude for complex tasks
+   - Budget models for simple tasks
+   - Local model when offline
+
+**New skills:**
+- `/ai-setup` — Guided setup for budget cloud and offline mode
+- `/ai-status` — Check your AI configuration and credits
+
+**Why you'll care:** Reduce your AI costs by 80%+ for everyday tasks, or work completely offline during travel — your choice.
+
+**User-friendly:** The setup is fully guided with plain-language explanations. Dex handles the technical parts (starting services, downloading models) automatically.
+
+---
+
 ### 📊 Help Dave Improve Dex (Optional Analytics)
 
 **What's this about?**

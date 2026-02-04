@@ -331,6 +331,7 @@ Skills extend Dex capabilities and are invoked with `/skill-name`. Common skills
 - `/triage`, `/meeting-prep`, `/process-meetings` - Meetings and inbox
 - `/project-health`, `/product-brief` - Projects
 - `/career-coach`, `/resume-builder` - Career development
+- `/ai-setup`, `/ai-status` - Configure budget cloud models (80% cheaper) and offline mode
 - `/dex-level-up`, `/dex-backlog`, `/dex-improve` - System improvements
 - `/dex-update` - Update Dex automatically (shows what's new, updates if confirmed, no technical knowledge needed)
 - `/dex-rollback` - Undo last update if something went wrong

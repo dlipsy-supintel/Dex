@@ -210,6 +210,10 @@ Built specifically for personal knowledge management and productivity workflows 
 - `/product-brief` - Generate PRD from ideas
 - `/triage` - Organize inbox and extract tasks
 
+**AI Configuration:**
+- `/ai-setup` - Configure budget cloud models (80% cheaper) and offline mode
+- `/ai-status` - Check your AI configuration and credits
+
 **System Management:**
 - `/prompt-improver` - Transform vague prompts via Anthropic Messages API
 - `/dex-level-up` - Discover unused features
