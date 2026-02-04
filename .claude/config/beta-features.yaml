@@ -83,7 +83,7 @@ features:
     code_salt: "screenpipe-beta-2026"
 
     # Documentation
-    instructions_file: "System/Beta/screenpipe/README.md"
+    instructions_file: ".claude/reference/beta-templates/screenpipe/README.md"
 
     # What this enables
     capabilities:

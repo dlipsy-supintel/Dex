@@ -214,6 +214,10 @@ Built specifically for personal knowledge management and productivity workflows 
 - `/ai-setup` - Configure budget cloud models (80% cheaper) and offline mode
 - `/ai-status` - Check your AI configuration and credits
 
+**Ambient Intelligence (Beta):**
+- `/screenpipe-setup` - Enable screen capture for work context *(requires beta activation)*
+- `/screenpipe-disable` - Stop screen capture and optionally delete data
+
 **System Management:**
 - `/prompt-improver` - Transform vague prompts via Anthropic Messages API
 - `/dex-level-up` - Discover unused features
