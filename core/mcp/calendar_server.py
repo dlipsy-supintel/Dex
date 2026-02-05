@@ -452,15 +452,22 @@ async def handle_call_tool(
     arguments = arguments or {}
     
     if name == "calendar_list_calendars":
-        success, output = run_shell_script("calendar_list.sh")
+        # Use fast EventKit
+        success, output = run_shell_script("calendar_eventkit.py", "list")
         
         if success:
-            calendars = parse_applescript_list(output)
-            result = {
-                "success": True,
-                "calendars": calendars,
-                "count": len(calendars)
-            }
+            try:
+                calendars = json.loads(output)
+                # Extract just the titles for backward compatibility
+                calendar_names = [cal["title"] for cal in calendars]
+                result = {
+                    "success": True,
+                    "calendars": calendar_names,
+                    "count": len(calendar_names),
+                    "details": calendars  # Full details for advanced use
+                }
+            except json.JSONDecodeError as e:
+                result = {"success": False, "error": f"JSON parse error: {e}"}
         else:
             result = {"success": False, "error": output}
         
@@ -487,6 +494,7 @@ async def handle_call_tool(
         # Use fast EventKit Python script (replaces slow AppleScript)
         success, output = run_shell_script(
             "calendar_eventkit.py",
+            "events",
             calendar_name,
             str(start_offset),
             str(end_offset)
@@ -582,8 +590,10 @@ async def handle_call_tool(
         days_back = arguments.get("days_back", 30)
         days_forward = arguments.get("days_forward", 30)
         
+        # Use fast EventKit search
         success, output = run_shell_script(
-            "calendar_search.sh",
+            "calendar_eventkit.py",
+            "search",
             calendar_name,
             query,
             str(days_back),
@@ -591,24 +601,17 @@ async def handle_call_tool(
         )
         
         if success:
-            events = []
-            for line in output.split('\n'):
-                if line.strip():
-                    event = {}
-                    for part in line.split('|'):
-                        if ':' in part:
-                            key, value = part.split(':', 1)
-                            event[key.lower()] = value.strip()
-                    if event:
-                        events.append(event)
-            
-            result = {
-                "success": True,
-                "query": query,
-                "calendar": calendar_name,
-                "events": events,
-                "count": len(events)
-            }
+            try:
+                events = json.loads(output)
+                result = {
+                    "success": True,
+                    "query": query,
+                    "calendar": calendar_name,
+                    "events": events,
+                    "count": len(events)
+                }
+            except json.JSONDecodeError as e:
+                result = {"success": False, "error": f"JSON parse error: {e}"}
         else:
             result = {"success": False, "error": output}
         
@@ -651,25 +654,27 @@ async def handle_call_tool(
     elif name == "calendar_get_next_event":
         calendar_name = arguments.get("calendar_name", DEFAULT_WORK_CALENDAR)
         
-        success, output = run_shell_script("calendar_next_event.sh", calendar_name)
+        # Use fast EventKit
+        success, output = run_shell_script("calendar_eventkit.py", "next", calendar_name)
         
         if success:
-            if output.startswith("TITLE:"):
-                event = {}
-                for part in output.split('|'):
-                    if ':' in part:
-                        key, value = part.split(':', 1)
-                        event[key.lower()] = value.strip()
-                result = {
-                    "success": True,
-                    "next_event": event
-                }
-            else:
-                result = {
-                    "success": True,
-                    "message": output,
-                    "next_event": None
-                }
+            try:
+                event_data = json.loads(output)
+                if "message" in event_data:
+                    # No events found
+                    result = {
+                        "success": True,
+                        "message": event_data["message"],
+                        "next_event": None
+                    }
+                else:
+                    # Event found
+                    result = {
+                        "success": True,
+                        "next_event": event_data
+                    }
+            except json.JSONDecodeError as e:
+                result = {"success": False, "error": f"JSON parse error: {e}"}
         else:
             result = {"success": False, "error": output}
         
@@ -689,50 +694,38 @@ async def handle_call_tool(
         start_offset = (start_dt - today).days
         end_offset = (end_dt - today).days
         
+        # Use fast EventKit with attendee details
         success, output = run_shell_script(
-            "calendar_get_events_with_attendees.sh",
+            "calendar_eventkit.py",
+            "attendees",
             calendar_name,
             str(start_offset),
             str(end_offset)
         )
         
         if success:
-            events = []
-            for line in output.split('\n'):
-                if line.strip():
-                    event = {}
-                    for part in line.split('|'):
-                        if ':' in part:
-                            key, value = part.split(':', 1)
-                            key = key.lower()
-                            if key == 'attendees' and value:
-                                # Parse attendees into structured data
-                                attendees = []
-                                for att_str in value.split(';'):
-                                    att = parse_attendee_string(att_str)
-                                    if att:
-                                        # Check if person page exists
-                                        person_page = find_person_page(att['name'], att['email'])
-                                        att['has_person_page'] = person_page is not None
-                                        if person_page:
-                                            att['person_page'] = str(person_page.relative_to(VAULT_PATH))
-                                        attendees.append(att)
-                                event[key] = attendees
-                            else:
-                                event[key] = value.strip()
-                    if event:
-                        events.append(event)
-            
-            # Sort by start time
-            events.sort(key=lambda x: x.get('start', ''))
-            
-            result = {
-                "success": True,
-                "calendar": calendar_name,
-                "date_range": f"{start_date} to {end_dt.strftime('%Y-%m-%d')}",
-                "events": events,
-                "count": len(events)
-            }
+            try:
+                events = json.loads(output)
+                
+                # Enhance attendees with person page links
+                for event in events:
+                    if "attendees" in event:
+                        for att in event["attendees"]:
+                            # Check if person page exists
+                            person_page = find_person_page(att.get('name', ''), att.get('email', ''))
+                            att['has_person_page'] = person_page is not None
+                            if person_page:
+                                att['person_page'] = str(person_page.relative_to(VAULT_PATH))
+                
+                result = {
+                    "success": True,
+                    "calendar": calendar_name,
+                    "date_range": f"{start_date} to {end_dt.strftime('%Y-%m-%d')}",
+                    "events": events,
+                    "count": len(events)
+                }
+            except json.JSONDecodeError as e:
+                result = {"success": False, "error": f"JSON parse error: {e}"}
         else:
             result = {"success": False, "error": output}
         

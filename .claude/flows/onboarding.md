@@ -139,6 +139,75 @@ Ask: "What's your company email domain? This helps me automatically:
 
 ---
 
+## Step 4b: Calendar Optimization (Auto-detected)
+
+**This step is AUTOMATIC - no user input needed unless multiple calendars detected.**
+
+**Purpose:** Optimize calendar queries for performance (45s → 0.3s) by identifying the user's work calendar.
+
+**How to check calendar count:**
+
+Run this AppleScript to count calendars:
+```bash
+osascript -e 'tell application "Calendar" to return count of calendars'
+```
+
+**If 1-2 calendars:**
+- Skip this step silently
+- Store `calendar.calendar_count: 1` in user-profile.yaml
+- The system will query all calendars (fast enough with just 1-2)
+
+**If 3+ calendars:**
+
+Say: "I noticed you have [X] calendars connected to Apple Calendar. To keep things fast, I'll focus on your work calendar.
+
+**What's your work email address?** (e.g., dave@company.com)
+
+This helps me:
+- Query only your work calendar (much faster)
+- Skip personal calendars, holidays, etc."
+
+**After receiving work email:**
+
+1. Verify the calendar exists:
+```bash
+osascript -e 'tell application "Calendar" to return name of calendars' | grep -i "[work_email]"
+```
+
+2. If found, store in `System/user-profile.yaml`:
+```yaml
+work_email: "user@company.com"
+calendar:
+  work_calendar: "user@company.com"
+  calendar_count: [X]
+  lazy_load: true
+```
+
+3. Say: "✓ Found your work calendar. Calendar queries will be much faster now."
+
+**If calendar not found:**
+
+Say: "I couldn't find a calendar matching that email. Your calendars are:
+[list calendar names]
+
+Which one is your primary work calendar?"
+
+**If user doesn't want to specify:**
+
+Say: "No problem! I'll query all calendars. Note: This may take 15-45 seconds when you ask about your schedule."
+
+Store:
+```yaml
+calendar:
+  work_calendar: ""
+  calendar_count: [X]
+  lazy_load: true
+```
+
+**Note:** This step doesn't use validate_and_save_step() - it's handled inline. Move directly to Step 5.
+
+---
+
 ## Step 5: Strategic Pillars
 
 Ask: "What are the 2-3 long-term areas of focus for your role? Think broad themes, not specific goals.
@@ -294,99 +363,10 @@ The MCP returns a summary of what was created (folders, files, configs).
 
 Show the summary from the MCP response.
 
-### Step 7b: Enable Background Automation (Automatic)
-
-**This step is automatic - no user prompt needed.**
-
-After vault creation, silently enable any background automation that applies:
-
-**Meeting Sync (if Granola detected):**
-
-Check if Granola is installed:
-```bash
-ls "$HOME/Library/Application Support/Granola/cache-v3.json" 2>/dev/null
-```
-
-**If Granola cache exists:**
-1. Run the automation installer silently:
-   ```bash
-   cd .scripts/meeting-intel && ./install-automation.sh
-   ```
-2. Add to the summary output: "✓ Automatic meeting sync enabled (syncs every 30 min)"
-
-**If Granola not detected:**
-- Skip silently (user can enable later via `/process-meetings --setup`)
-
-**Why automatic:** Background sync is the default experience. Users shouldn't need to opt-in to basic functionality.
-
-## Step 8: Analytics Consent
-
-**Beta Feature:** Only applies if user has activated the analytics beta.
-
-**Check first:**
-1. Call `check_beta_enabled(feature="analytics")` from Beta MCP
-2. If NOT enabled → **Skip this step entirely** (no prompt)
-3. If enabled → Continue with consent prompt below
-
-**If analytics beta is enabled:**
-
-Say: "One quick question before we finish:
-
-Dave could use your help improving Dex. By sharing anonymous feature usage—things like 'ran /daily-plan' or 'created a task'—you help show what's working and what needs improvement.
-
-• **What's tracked:** Only Dex built-in features (not anything you customize or add)
-• **What Dave never sees:** What you DO with features—just that you used them
-• **Never sent:** Your content, names, notes, conversations, or anything personal
-• **Your control:** To opt out later, just say "turn off Dex analytics" anytime
-
-Help improve Dex?"
-
-Use the AskQuestion tool:
-```json
-{
-  "questions": [{
-    "id": "analytics_consent",
-    "prompt": "Help Dave improve Dex by sharing anonymous feature usage?",
-    "allow_multiple": false,
-    "options": [
-      {"id": "yes", "label": "Yes, happy to help"},
-      {"id": "no", "label": "No thanks"}
-    ]
-  }]
-}
-```
-
-**If YES:**
-1. Update `System/user-profile.yaml`:
-   ```yaml
-   analytics:
-     enabled: true
-   ```
-2. Update `System/usage_log.md`:
-   - `Consent asked: true`
-   - `Consent decision: opted-in`
-   - `Consent date: YYYY-MM-DD`
-3. Say: "Thanks! This really helps Dave make Dex better. 🙏"
-
-**If NO:**
-1. Update `System/user-profile.yaml`:
-   ```yaml
-   analytics:
-     enabled: false
-   ```
-2. Update `System/usage_log.md`:
-   - `Consent asked: true`
-   - `Consent decision: opted-out`
-   - `Consent date: YYYY-MM-DD`
-3. Say: "No problem! Dex works exactly the same either way."
-
----
-
-## Step 9: Optional Features
+## Step 8: Optional Features
 
 Say: "The core system is ready. A couple optional add-ons you can set up now or skip:
 
-- **Productivity Tools** — Connect Notion, Slack, or Google Workspace for richer context
 - **Journaling** — Daily/weekly reflection prompts (2-3 min/day)
 - **Granola** — Automatic meeting processing (if you use it)
 - **Pendo** — Product analytics integration (if you're a Pendo customer)
@@ -434,7 +414,65 @@ Want to set up manual or automatic processing?"
 3. Update `System/user-profile.yaml` and `.env`
 4. Say: "✓ Automatic processing enabled. I'll sync every 30 minutes. You can still use `/getting-started` for historical data."
 
-### Pendo Setup (if selected):
+### Analytics Consent (Always Ask):
+
+**This is asked for ALL new users, not just those selecting Pendo.**
+
+Say: "One quick question before we finish:
+
+**Dave could use your help improving Dex.** By sharing anonymous feature usage—things like 'ran /daily-plan' or 'created a task'—you help show what's working and what needs improvement.
+
+• **What's tracked:** Only Dex built-in features (not anything you customize or add)
+• **What Dave never sees:** What you DO with features—just that you used them
+• **Never sent:** Your content, names, notes, conversations, or anything personal
+• **Your control:** You can change this anytime in System/user-profile.yaml
+
+**Help improve Dex?**"
+
+Use the AskQuestion tool:
+```json
+{
+  "questions": [{
+    "id": "analytics_consent",
+    "prompt": "Share anonymous usage data to help improve Dex?",
+    "allow_multiple": false,
+    "options": [
+      {"id": "yes", "label": "Yes, help improve Dex"},
+      {"id": "no", "label": "No thanks"}
+    ]
+  }]
+}
+```
+
+**If YES:**
+1. Update `System/user-profile.yaml`:
+   ```yaml
+   analytics:
+     enabled: true
+     anonymous: true
+   ```
+2. Update `System/usage_log.md`:
+   - `Consent asked: true`
+   - `Consent decision: opted-in`
+   - `Consent date: YYYY-MM-DD`
+3. Fire `analytics_consent_given` event (first event!)
+4. Say: "Thanks! This really helps Dave make Dex better. 🙏"
+
+**If NO:**
+1. Update `System/user-profile.yaml`:
+   ```yaml
+   analytics:
+     enabled: false
+   ```
+2. Update `System/usage_log.md`:
+   - `Consent asked: true`
+   - `Consent decision: opted-out`
+   - `Consent date: YYYY-MM-DD`
+3. Say: "No problem! Dex works exactly the same either way."
+
+---
+
+### Pendo MCP Setup (if selected - for Pendo customers):
 
 Ask: "Are you a Pendo customer? Pendo's MCP integration gives you:
 - Guide performance tracking (in-app messages, onboarding flows)
@@ -483,64 +521,6 @@ Want to connect Pendo now?"
 **If no:**
 Say: "No problem! You can connect Pendo MCP later. Full instructions: https://support.pendo.io/hc/en-us/articles/41102236924955"
 
-### Productivity Tools Setup (if selected):
-
-Say: "Which productivity tools do you use? I can connect to them for richer context:
-
-- **Notion** — Search your workspace, pull docs into meeting prep
-- **Slack** — Search conversations, get context about people
-- **Google Workspace** — Gmail, Calendar, Contacts (more advanced setup)
-
-These are optional—Dex works great without them. But if you use these tools, connecting them unlocks:
-- 'What did Sarah say about the Q1 budget?' → Searches Slack
-- Meeting prep automatically pulls relevant Notion docs
-- Person pages show email/Slack history"
-
-Use the AskQuestion tool:
-```json
-{
-  "questions": [{
-    "id": "productivity_tools",
-    "prompt": "Which tools do you want to connect?",
-    "allow_multiple": true,
-    "options": [
-      {"id": "notion", "label": "Notion"},
-      {"id": "slack", "label": "Slack"},
-      {"id": "google", "label": "Google Workspace (Gmail, Calendar)"},
-      {"id": "skip", "label": "Skip - I'll add these later"}
-    ]
-  }]
-}
-```
-
-**For each selected tool:**
-
-**Notion:** Run `/integrate-notion` flow inline
-- Guide through creating Notion integration
-- Collect token, configure MCP
-
-**Slack:** Run `/integrate-slack` flow inline
-- Offer cookie auth (easier) vs bot token
-- Collect credential, configure MCP
-
-**Google:** Run `/integrate-google` flow inline
-- Warn this is the most complex setup (~5 min)
-- Guide through OAuth setup
-- Offer to skip and add later if they're overwhelmed
-
-**If skip:**
-Say: "No problem! You can add these anytime:
-- `/integrate-notion`
-- `/integrate-slack`
-- `/integrate-google`"
-
-**After any tool setup:**
-1. Update `System/integrations/config.yaml` with enabled tools
-2. Remind user to restart Claude Desktop
-3. Say: "✓ [Tool] connected! [Brief explanation of what they can now do]"
-
----
-
 ### Background Learning Setup (if selected, macOS only):
 
 Say: "This installs two background jobs that run automatically:
@@ -559,7 +539,34 @@ Ask: "Install background automation?"
 **If no:**
 Say: "No problem! Self-learning checks will still run inline during session start and `/daily-plan`. You can install later with `bash .scripts/install-learning-automation.sh`"
 
-## Step 10: Completion & Phase 2 Bridge
+## Step 9: Completion & Phase 2 Bridge
+
+### Cursor Version Check (If Cursor Detected)
+
+Before the completion message, check if user is using Cursor < 2.4:
+
+**Check:** Look for `~/.cursor` directory. If it exists, try to detect version from `/Applications/Cursor.app/Contents/Info.plist` (macOS).
+
+**If Cursor < 2.4 detected:**
+
+Say: "⚠️ **Important: Cursor Version Update Needed**
+
+I noticed you're using Cursor [version]. Dex skills (like `/daily-plan`, `/meeting-prep`, etc.) require **Cursor 2.4 or later**.
+
+**To update:**
+1. Cursor menu → Check for Updates, OR
+2. Download latest from [cursor.com](https://cursor.com)
+
+After updating, all Dex skills will work automatically. For now, you can continue setup, but skills won't appear in the `/` menu until you upgrade.
+
+[Continue with setup anyway] / [Pause and update Cursor first]"
+
+**If user continues:** Proceed with setup, skills will work after they update.
+**If user pauses:** Say "No problem! Update Cursor first, then come back and type `/setup` to resume."
+
+---
+
+### Completion Message
 
 Say: "✓ **Your workspace is ready, [Name]!**
 
@@ -589,9 +596,9 @@ This takes about 2 minutes and shows you what Dex can really do.
 
 ---
 
-## Step 11: Phase 2 - Getting Started (Optional but Recommended)
+## Step 10: Phase 2 - Getting Started (Optional but Recommended)
 
-**Trigger:** Either immediately after Step 10, OR at next session start if vault is < 7 days old.
+**Trigger:** Either immediately after Step 9, OR at next session start if vault is < 7 days old.
 
 **Purpose:** Transform "I have a system, now what?" into immediate value and confidence. This is where the **dramatic reveal** happens - analyzing their calendar/Granola data and showing what Dex built automatically.
 
