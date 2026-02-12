@@ -228,7 +228,50 @@ Check if QMD MCP tools are available by calling `qmd_status`. **If available:**
 
 ---
 
-### 5.7 Standard Context Gathering
+### 5.7 Reminders Completion Sync (Dex Today → Dex)
+
+Check if any tasks were completed on phone since the last plan:
+
+```
+Use: reminders_list_completed(list_name="Dex Today")
+```
+
+For each completed item:
+- Match to a Dex task by title
+- Update task status via Work MCP: `update_task_status(task_title="...", status="d")`
+- Surface what was synced:
+
+> "📱 **Synced from phone:**
+> - ✅ "Follow up with Hero Coders" — marked done in Dex"
+
+**If nothing to sync:** Skip silently.
+
+### 5.8 Mobile Capture Check (Dex Inbox)
+
+```
+Use: reminders_list_items(list_name="Dex Inbox")
+```
+
+If items found, surface:
+
+> 📱 **Captured on phone** (3 items in Dex Inbox):
+>
+> 1. "Follow up with Peter about roadmap" — captured yesterday 4:32pm
+> 2. "Look into Rovo for in-app guides" — captured today 2:15pm
+> 3. "Send Anastasia the productized offering doc" — captured today 11:45am
+>
+> **Triage these now?** I'll help assign pillars and priorities.
+
+**Triage flow:**
+- Present each item
+- Infer pillar (using existing smart pillar inference)
+- Confirm with user
+- Create task via Work MCP `process_inbox_with_dedup`
+- Mark Reminder as complete via `reminders_complete_item`
+
+**If Dex Inbox is empty:** Skip silently (no "0 items captured" noise).
+
+### 5.9 Standard Context Gathering
 
 Also gather:
 - **Calendar**: Today's meetings with times and attendees
@@ -389,6 +432,33 @@ integrations_used: [calendar, tasks, people, work-intelligence]
 
 ---
 
+## Step 7.5: Push Focus Tasks to Reminders (Dex → iPhone)
+
+After generating the plan, push today's P0 and P1 focus tasks to Apple Reminders for native iOS notifications:
+
+1. **Clear yesterday's items:**
+   ```
+   Use: reminders_clear_completed(list_name="Dex Today")
+   ```
+
+2. **Push today's focus items:**
+   For each P0/P1 task in today's focus:
+   ```
+   Use: reminders_create_item(
+       list_name="Dex Today",
+       title="Task title",
+       notes="From Dex daily plan",
+       due_date="YYYY-MM-DD"
+   )
+   ```
+
+3. **Confirm silently:**
+   > "📱 Pushed 3 focus tasks to iPhone Reminders (Dex Today)"
+
+**If Reminders MCP unavailable:** Skip silently.
+
+---
+
 ## Step 8: Track Usage (Silent)
 
 Update `System/usage_log.md` to mark daily planning as used.
@@ -427,6 +497,7 @@ The plan works at multiple levels:
 | Integration | MCP Server | Tools Used |
 |-------------|------------|------------|
 | Calendar | dex-calendar-mcp | `calendar_get_today`, `calendar_get_events_with_attendees` |
+| Reminders | dex-calendar-mcp | `reminders_list_items`, `reminders_complete_item`, `reminders_create_item`, `reminders_ensure_lists`, `reminders_list_completed`, `reminders_find_and_complete`, `reminders_clear_completed` |
 | Granola | dex-granola-mcp | `get_recent_meetings` |
 | Work | dex-work-mcp | `list_tasks`, `get_week_progress`, `get_meeting_context`, `get_commitments_due`, `analyze_calendar_capacity`, `suggest_task_scheduling` |
 | Improvements | dex-improvements-mcp | `synthesize_changelog`, `synthesize_learnings`, `list_ideas` |
