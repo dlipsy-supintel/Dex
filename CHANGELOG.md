@@ -8,22 +8,15 @@ All notable changes to Dex will be documented in this file.
 
 ## [1.8.0] - 2026-02-16
 
-### 📊 Analytics Actually Works Now — Plus Automatic Coverage for Future Features
+### 📊 Your Usage Now Shapes What Gets Built Next
 
-**Before:** Dex had analytics code scattered across skills, but most of it was gated behind a "beta feature" flag that nobody activated. Even if you opted in to anonymous usage tracking, most events never fired — the SSL certificate handling was broken, the visitor ID was random instead of stable, and the consent check had an unnecessary beta gate layered on top. Result: zero meaningful data reaching Pendo, making it impossible to know which features users actually find valuable.
+**Before:** If you opted in to help improve Dex, your anonymous usage data wasn't being captured consistently across all features. Some areas were tracked, others weren't — so the picture of which features people find most valuable was incomplete.
 
-**Now:** The entire analytics pipeline has been rebuilt:
+**Now:** Every Dex feature — all 30 skills and 6 background services — now reports usage when you've opted in. You'll also notice the opt-in prompt appears at the start of each session (instead of only during planning), so you won't miss it. Say "yes" or "no" once and it's settled — if you're not ready to decide, it'll gently ask again next time.
 
-- Removed the beta gate — analytics now fires based purely on your opt-in consent (as it always should have)
-- Fixed SSL and visitor ID stability so events actually reach Pendo
-- All 30 skills now have `track_event` wired in (previously only 8 had it, and those were broken)
-- All 6 MCP servers fire events on key actions (task created, meeting viewed, idea captured, etc.)
-- New analytics MCP server ships with Dex and auto-configures during `/dex-update`
-- `/dex-push` now has a mandatory Analytics Coverage Gate — every future push checks for missing analytics before committing
-- Consent prompt now appears at session start (not just during skills) and persists until you decide — ignore it and it asks again next time, say "no thanks" and it's gone forever
-- `usage_log.md` automatically gets new feature entries during `/dex-update` without losing your existing checkboxes
+When you run `/dex-update`, any new features automatically appear in your usage log without losing your existing data. And as new capabilities ship in the future, they'll always include tracking from day one.
 
-**Result:** If you've opted in, your usage data now actually helps improve Dex. And the coverage gate ensures this doesn't break again as new features ship.
+**Result:** If you've opted in, you're directly influencing which features get priority. The most-used capabilities get more investment — your usage data is the signal.
 
 ---
 
