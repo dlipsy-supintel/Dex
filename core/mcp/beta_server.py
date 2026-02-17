@@ -400,7 +400,12 @@ async def handle_call_tool(
         return await _handle_call_tool_inner(name, arguments)
     except Exception as e:
         if _HAS_HEALTH:
-            _log_health_error("beta-mcp", str(e), context={"tool": name})
+            _log_health_error(
+                source="beta-mcp",
+                message=str(e),
+                human_message=f"Beta feature tool '{name}' failed",
+                context={"tool": name}
+            )
         raise
 
 

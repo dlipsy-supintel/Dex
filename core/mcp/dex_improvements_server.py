@@ -27,6 +27,13 @@ from mcp.server.models import InitializationOptions
 import mcp.server.stdio
 import mcp.types as types
 
+# QMD semantic search (optional - gracefully degrade if not available)
+try:
+    from utils.qmd_query import is_qmd_available, vault_search
+    HAS_QMD = True
+except ImportError:
+    HAS_QMD = False
+
 # Analytics helper (optional - gracefully degrade if not available)
 try:
     from analytics_helper import fire_event as _fire_analytics_event
@@ -123,25 +130,59 @@ def calculate_similarity(text1: str, text2: str) -> float:
     return SequenceMatcher(None, text1.lower(), text2.lower()).ratio()
 
 def find_similar_ideas(title: str, description: str) -> List[Dict[str, Any]]:
-    """Find ideas similar to the given title/description"""
+    """Find ideas similar to the given title/description.
+    
+    Uses QMD semantic search when available for meaning-based dedup
+    (e.g., "Auto-suggest meeting prep" matches "Meeting intelligence assistant").
+    Falls back to SequenceMatcher when QMD is not installed.
+    """
     if not BACKLOG_FILE.exists():
         return []
     
     similar = []
     ideas = parse_backlog_file()
     
+    # --- QMD semantic dedup (if available) ---
+    qmd_title_matches = set()
+    if HAS_QMD and is_qmd_available():
+        try:
+            results = vault_search(
+                query=f"{title} {description[:100]}",
+                limit=5,
+                min_score=0.3,
+                fallback_glob="System/Dex_Backlog.md"
+            )
+            for r in results:
+                snippet = r.get('snippet', '').lower()
+                score = r.get('score', 0)
+                if score >= 0.35:
+                    qmd_title_matches.add(snippet[:100])
+        except Exception:
+            pass
+    
     for idea in ideas:
         title_similarity = calculate_similarity(title, idea['title'])
         desc_similarity = calculate_similarity(description, idea.get('description', ''))
         
-        # Combined score (title weighted more heavily)
-        similarity_score = (title_similarity * 0.7) + (desc_similarity * 0.3)
+        # Check if QMD flagged this idea as semantically similar
+        qmd_boost = 0.0
+        if qmd_title_matches:
+            idea_title_lower = idea['title'].lower()
+            for qmd_snippet in qmd_title_matches:
+                if idea_title_lower in qmd_snippet or any(
+                    word in qmd_snippet for word in idea_title_lower.split() if len(word) > 4
+                ):
+                    qmd_boost = 0.15
+                    break
         
-        if similarity_score >= 0.6:
+        similarity_score = (title_similarity * 0.6) + (desc_similarity * 0.25) + qmd_boost
+        
+        if similarity_score >= 0.5:
             similar.append({
                 'id': idea['id'],
                 'title': idea['title'],
-                'similarity': round(similarity_score, 2)
+                'similarity': round(similarity_score, 2),
+                'semantic_match': qmd_boost > 0
             })
     
     similar.sort(key=lambda x: x['similarity'], reverse=True)
@@ -740,7 +781,12 @@ async def handle_call_tool(
         return await _handle_call_tool_inner(name, arguments)
     except Exception as e:
         if _HAS_HEALTH:
-            _log_health_error("dex-improvements-mcp", str(e), context={"tool": name})
+            _log_health_error(
+                source="dex-improvements-mcp",
+                message=str(e),
+                human_message=f"Backlog tool '{name}' failed",
+                context={"tool": name}
+            )
         raise
 
 

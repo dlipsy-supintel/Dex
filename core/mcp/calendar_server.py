@@ -461,7 +461,22 @@ async def handle_call_tool(
         return await _handle_call_tool_inner(name, arguments)
     except Exception as e:
         if _HAS_HEALTH:
-            _log_health_error("calendar-mcp", str(e), context={"tool": name})
+            _tool_human_messages = {
+                "calendar_list_calendars": "Calendar listing failed",
+                "calendar_get_events": "Calendar events lookup failed",
+                "calendar_get_today": "Today's events lookup failed",
+                "calendar_create_event": "Calendar event creation failed",
+                "calendar_search_events": "Calendar event search failed",
+                "calendar_delete_event": "Calendar event deletion failed",
+                "calendar_get_next_event": "Next event lookup failed",
+                "calendar_get_events_with_attendees": "Attendee events lookup failed",
+            }
+            _log_health_error(
+                source="calendar-mcp",
+                message=str(e),
+                human_message=_tool_human_messages.get(name, f"Calendar tool '{name}' failed"),
+                context={"tool": name},
+            )
         raise
 
 

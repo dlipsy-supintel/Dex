@@ -86,6 +86,47 @@ Parse `System/pillars.yaml`:
 
 ---
 
+## Step 0.5: Semantic Matching Enhancement (if QMD available)
+
+**This step activates automatically when QMD is installed.** It dramatically improves routing accuracy by matching inbox items to goals, projects, and people by **meaning**, not just keywords.
+
+Check if QMD MCP tools are available by calling `qmd_status`. **If available:**
+
+After loading strategic context (Step 0), enhance matching with semantic search:
+
+1. **For each inbox item**, run:
+   ```
+   qmd_search(query="[item title + first 100 words of content]", limit=5)
+   ```
+   This finds vault content related by meaning. "Email about onboarding flow" matches "Q1 goal: improve activation rate" even though they share no keywords.
+
+2. **For task deduplication**, use semantic similarity instead of keyword overlap:
+   ```
+   qmd_search(query="[task description]", limit=3)
+   ```
+   Catches semantic duplicates: "Review Q1 metrics" detected as duplicate of "Check quarterly pipeline numbers".
+
+3. **For goal alignment scoring**, run:
+   ```
+   qmd_search(query="[item content]", limit=3)
+   ```
+   against quarterly goals and weekly priorities. Items semantically related to active goals get a +25 confidence boost.
+
+**How this changes matching:**
+
+| Aspect | Without QMD (keyword) | With QMD (semantic) |
+|--------|----------------------|---------------------|
+| Goal matching | Exact keyword overlap only | Meaning-based: "churn analysis" matches "retention goal" |
+| Duplicate detection | >60% string similarity | Semantic similarity: different words, same intent |
+| Person matching | Name must appear in text | Role/title references found: "the sales VP" → Sarah Chen |
+| Project matching | Project name in filename | Thematic connection: "pricing update" → "Acme Deal" project |
+
+**Merge semantic scores with entity scores** from Step 0. The combined confidence determines routing priority.
+
+**If QMD is not available:** Skip silently. The standard keyword-based matching in the steps below handles routing with existing patterns.
+
+---
+
 ## Mode: Files
 
 Organize standalone files in the `00-Inbox/` folder by suggesting where they belong.

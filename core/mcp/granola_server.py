@@ -833,7 +833,20 @@ async def handle_call_tool(
         return await _handle_call_tool_inner(name, arguments)
     except Exception as e:
         if _HAS_HEALTH:
-            _log_health_error("granola-mcp", str(e), context={"tool": name})
+            _tool_human_messages = {
+                "granola_check_available": "Granola availability check failed",
+                "granola_get_recent_meetings": "Recent meetings lookup failed",
+                "granola_get_meeting_details": "Meeting details lookup failed",
+                "granola_search_meetings": "Meeting search failed",
+                "granola_get_today_meetings": "Today's meetings lookup failed",
+                "granola_get_extent": "Granola data extent lookup failed",
+            }
+            _log_health_error(
+                source="granola-mcp",
+                message=str(e),
+                human_message=_tool_human_messages.get(name, f"Granola tool '{name}' failed"),
+                context={"tool": name},
+            )
         raise
 
 

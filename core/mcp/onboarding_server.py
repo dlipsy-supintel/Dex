@@ -1390,7 +1390,12 @@ async def handle_call_tool(name: str, arguments: dict | None) -> list[types.Text
     
     except Exception as e:
         if _HAS_HEALTH:
-            _log_health_error("onboarding-mcp", str(e), context={"tool": name})
+            _log_health_error(
+                source="onboarding-mcp",
+                message=str(e),
+                human_message=f"Onboarding step '{name}' failed",
+                context={"tool": name}
+            )
         logger.error(f"Error handling {name}: {e}")
         result = create_error_response(f"Internal error: {e}")
         return [types.TextContent(type="text", text=json.dumps(result, indent=2))]

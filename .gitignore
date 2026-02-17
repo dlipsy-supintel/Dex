@@ -30,6 +30,7 @@ node_modules/
 System/user-profile.yaml
 System/pillars.yaml
 System/.last-update-check
+System/.update-available
 
 # Custom extensions (user-created, never in upstream)
 CLAUDE-custom.md

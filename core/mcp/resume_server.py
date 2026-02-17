@@ -480,7 +480,12 @@ async def handle_call_tool(
             )]
     except Exception as e:
         if _HAS_HEALTH:
-            _log_health_error("resume-mcp", str(e), context={"tool": name})
+            _log_health_error(
+                source="resume-mcp",
+                message=str(e),
+                human_message=f"Resume tool '{name}' failed",
+                context={"tool": name}
+            )
         logger.error(f"Error in {name}: {e}", exc_info=True)
         return [types.TextContent(
             type="text",

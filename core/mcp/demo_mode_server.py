@@ -374,7 +374,12 @@ async def handle_call_tool(name: str, arguments: dict) -> list[types.TextContent
         return await _handle_call_tool_inner(name, arguments)
     except Exception as e:
         if _HAS_HEALTH:
-            _log_health_error("demo-mode-mcp", str(e), context={"tool": name})
+            _log_health_error(
+                source="demo-mode-mcp",
+                message=str(e),
+                human_message=f"Demo mode tool '{name}' failed",
+                context={"tool": name}
+            )
         raise
 
 async def _handle_call_tool_inner(name: str, arguments: dict) -> list[types.TextContent]:

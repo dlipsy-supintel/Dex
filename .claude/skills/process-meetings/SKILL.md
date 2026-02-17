@@ -156,6 +156,40 @@ For each unique external company domain:
    - Add any new contacts to "Key Contacts"
    - Add meeting to "Meeting History"
 
+### Step 4.5: Semantic Enrichment (if QMD available)
+
+**Check if semantic search is available** by looking for `qmd` in PATH.
+
+If available, enhance meeting processing with meaning-based intelligence:
+
+1. **Detect implicit commitments:** For each meeting's discussion notes, search semantically:
+   ```
+   qmd query "we should circle back on..." --limit 3
+   qmd query "let me think about..." --limit 3
+   ```
+   Catch soft commitments that regex action-item extraction misses.
+   - Examples: "we should probably revisit the pricing model" → implicit action item
+   - "I need to noodle on the migration approach" → implicit commitment
+   - "Let's reconnect after the board meeting" → implicit follow-up
+
+2. **Link meetings to projects:** For the meeting topic, search:
+   ```
+   qmd query "meeting topic/title" --limit 3
+   ```
+   against `04-Projects/` to auto-link the meeting to relevant projects that keyword matching would miss.
+
+3. **Enrich person context:** For each new person encountered, search:
+   ```
+   qmd query "person name + company" --limit 3
+   ```
+   Find if they've been mentioned in other meetings/notes, even if they weren't a direct participant.
+
+**Integration:**
+- Add implicit commitments to the action items list with a note: "*(detected — not explicitly stated)*"
+- Add project links to meeting frontmatter
+- Merge person context into newly-created person pages
+- If QMD unavailable, skip silently — regex extraction still works
+
 ### Step 5: Extract Tasks (unless --no-todos or --people-only)
 
 For each meeting with unextracted tasks:

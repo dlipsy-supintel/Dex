@@ -67,6 +67,35 @@ For each weekly priority:
 >    - Reason: Calendar was too stacked
 >    - Recommendation: Carry to next week with protected time"
 
+### 1.5 Semantic Goal-to-Work Mapping (if QMD available)
+
+**Check if semantic search is available** by looking for `qmd` in PATH.
+
+If available, enhance the weekly priority review with meaning-based analysis:
+
+1. **Auto-detect goal contributions:** For each completed task this week, search:
+   ```
+   qmd query "task title/description" --limit 3
+   ```
+   against quarterly goals. Catch tasks that advanced goals without explicit links.
+   - Example: "Built customer health dashboard" semantically matches goal "Improve NPS tracking" — different words, same work.
+
+2. **Cross-priority connections:** Search for work that bridges multiple priorities:
+   ```
+   qmd query "priority 1 description" --limit 5
+   ```
+   Surface tasks that contributed to more than one priority.
+
+3. **Thematic patterns:** Search for recurring themes across the week's work:
+   ```
+   qmd query "common theme from meetings/tasks" --limit 5
+   ```
+   Detect patterns like "most of your work this week clustered around customer retention" even when tasks used different terminology.
+
+**Integration:** Merge findings into the Quarterly Goals table — add a "Hidden contributions" row for semantically-detected but not explicitly-linked work. Only show genuinely new connections, not things already captured by keyword matching.
+
+**If QMD unavailable:** Skip silently. Task completion stats still work fine.
+
 ### 2. Task Completion Stats (Concrete Numbers)
 
 Scan `03-Tasks/Tasks.md` for completion timestamps from this week:

@@ -185,4 +185,28 @@ if [[ -f "$ONBOARDING_MARKER" ]]; then
     fi
 fi
 
+# 11. Dex Health System — Pre-flight checks and error queue
+# Runs preflight health checks (MCP servers, config files, etc.) and displays
+# any queued errors. Silent when everything is healthy (no output = no display).
+if [[ -f "$ONBOARDING_MARKER" ]]; then
+    DEX_CORE_DIR="$CLAUDE_DIR/dex-core"
+    if [[ -f "$DEX_CORE_DIR/core/utils/preflight.py" ]]; then
+        HEALTH_OUTPUT=$(cd "$DEX_CORE_DIR" && python3 -c "
+import sys
+sys.path.insert(0, '.')
+from core.utils.preflight import run_preflight, format_output, format_errors
+health = run_preflight()
+preflight = format_output(health)
+errors = format_errors()
+if preflight:
+    print(preflight)
+if errors:
+    print(errors)
+" 2>/dev/null)
+        if [[ -n "$HEALTH_OUTPUT" ]]; then
+            echo "$HEALTH_OUTPUT"
+        fi
+    fi
+fi
+
 echo "=== End Session Context ==="

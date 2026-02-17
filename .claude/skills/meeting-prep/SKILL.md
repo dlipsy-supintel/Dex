@@ -92,6 +92,36 @@ Search `00-Inbox/Meetings/` for recent meetings with these attendees:
 - What was decided?
 - What follow-ups were committed?
 
+### Step 3a: Semantic Context Enrichment (if QMD available)
+
+**This step runs automatically when QMD is installed.** It enriches meeting prep with semantically related vault content that keyword search would miss.
+
+Check if QMD MCP tools are available by calling `qmd_status`. **If available:**
+
+1. **Semantic search for meeting topic:**
+   ```
+   qmd_search(query="$MEETING", limit=5)
+   ```
+   Look for: related past discussions, relevant decisions, thematic connections — content that shares meaning with the meeting topic but uses different words.
+
+2. **Semantic search for each attendee (beyond their person page):**
+   ```
+   qmd_search(query="$ATTENDEE_NAME context discussions decisions", limit=3)
+   ```
+   Look for: contextual references where this person is mentioned by role/title/team (e.g., "the VP of Sales asked about..."), not just by name.
+
+3. **Cross-reference results** with what Steps 1-3 already found. **Only surface NEW insights** — content that the keyword-based person page lookup and meeting folder grep in earlier steps missed.
+
+**Add to the prep brief under a "Semantic Connections" heading:**
+- Past discussions thematically related to this meeting (even if different keywords were used)
+- Decisions made in adjacent contexts that are relevant here
+- Commitments or open items discovered through semantic matching
+- Related projects or goals that connect by meaning
+
+**If QMD is not available:** Skip this step silently. Steps 1-3 provide the standard keyword-based context.
+
+---
+
 ### Step 3b: Integration Context (if available)
 
 Check `System/integrations/config.yaml` to see which integrations are enabled.

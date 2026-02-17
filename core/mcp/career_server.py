@@ -25,6 +25,13 @@ from mcp.server.models import InitializationOptions
 import mcp.server.stdio
 import mcp.types as types
 
+# QMD semantic search (optional - gracefully degrade if not available)
+try:
+    from utils.qmd_query import is_qmd_available, vault_search
+    HAS_QMD = True
+except ImportError:
+    HAS_QMD = False
+
 # Analytics helper (optional - gracefully degrade if not available)
 try:
     from analytics_helper import fire_event as _fire_analytics_event
@@ -299,7 +306,22 @@ async def handle_call_tool(
             )]
     except Exception as e:
         if _HAS_HEALTH:
-            _log_health_error("career-mcp", str(e), context={"tool": name})
+            _tool_human_messages = {
+                "scan_evidence": "Career evidence scan failed",
+                "parse_ladder": "Career ladder parsing failed",
+                "analyze_coverage": "Competency coverage analysis failed",
+                "timeline_analysis": "Career timeline analysis failed",
+                "scan_work_for_evidence": "Work evidence scan failed",
+                "skills_gap_analysis": "Skills gap analysis failed",
+                "generate_evidence_from_work": "Evidence generation failed",
+                "promotion_readiness_score": "Promotion readiness calculation failed",
+            }
+            _log_health_error(
+                source="career-mcp",
+                message=str(e),
+                human_message=_tool_human_messages.get(name, f"Career tool '{name}' failed"),
+                context={"tool": name},
+            )
         logger.error(f"Error in {name}: {e}", exc_info=True)
         return [types.TextContent(
             type="text",
@@ -797,16 +819,48 @@ async def handle_skills_gap_analysis(arguments: dict) -> list[types.TextContent]
             active_skills[skill]['sources'].append('task')
             active_skills[skill]['last_seen'] = datetime.now()
     
+    # 2.5 QMD semantic skill detection (if available)
+    # Finds skill demonstration without explicit # Career: tags
+    qmd_skill_evidence = {}
+    if HAS_QMD and is_qmd_available():
+        try:
+            for skill in required_skills:
+                results = vault_search(
+                    query=f"demonstrated {skill}",
+                    limit=3,
+                    min_score=0.3,
+                    fallback_glob="05-Areas/Career/Evidence/**/*.md"
+                )
+                for r in results:
+                    score = r.get('score', 0)
+                    if score >= 0.35:
+                        if skill not in qmd_skill_evidence:
+                            qmd_skill_evidence[skill] = []
+                        qmd_skill_evidence[skill].append({
+                            'filepath': r.get('filepath', ''),
+                            'snippet': r.get('snippet', '')[:150],
+                            'score': score
+                        })
+                        # Also register in active_skills if not already there
+                        if skill not in active_skills:
+                            active_skills[skill] = {'count': 0, 'last_seen': None, 'sources': []}
+                        active_skills[skill]['count'] += 1
+                        active_skills[skill]['sources'].append('semantic_detection')
+                        if not active_skills[skill]['last_seen']:
+                            active_skills[skill]['last_seen'] = datetime.now()
+        except Exception:
+            pass  # Graceful degradation
+    
     # 3. Identify gaps
     skills_gap = []
     stale_skills = []
     actively_developed = []
     
     for skill in required_skills:
-        # Fuzzy match against active skills
+        # Fuzzy match against active skills (now includes QMD-detected)
         matched = False
         for active_skill in active_skills.keys():
-            # Simple substring match - real implementation would use fuzzy matching
+            # Simple substring match + QMD semantic enhancement
             if skill.lower() in active_skill.lower() or active_skill.lower() in skill.lower():
                 matched = True
                 # Check if stale
@@ -840,7 +894,9 @@ async def handle_skills_gap_analysis(arguments: dict) -> list[types.TextContent]
         'skills_gap_count': len(skills_gap),
         'stale_skills': stale_skills,
         'stale_skills_count': len(stale_skills),
-        'coverage_percentage': round((len(actively_developed) / len(required_skills) * 100) if required_skills else 0, 1)
+        'coverage_percentage': round((len(actively_developed) / len(required_skills) * 100) if required_skills else 0, 1),
+        'semantic_evidence': qmd_skill_evidence if qmd_skill_evidence else None,
+        'semantic_search_used': bool(qmd_skill_evidence)
     }
     
     return [types.TextContent(

@@ -89,6 +89,38 @@ Look for `00-Inbox/Weekly_Synthesis_*.md` files in quarter:
 
 ---
 
+## Step 2.5: Semantic Context Enrichment (if QMD available)
+
+**Check if semantic search is available** by looking for `qmd` in PATH.
+
+If available, enhance the quarterly review with meaning-based analysis:
+
+1. **Link lessons to goals:** For each major learning captured this quarter, search:
+   ```
+   qmd query "learning description" --limit 3
+   ```
+   against `01-Quarter_Goals/Quarter_Goals.md`. Discover which goals a learning actually impacted, even without explicit tags.
+   - Example: Learning "Realized we need better onboarding docs" semantically matches goal "Improve customer activation rate"
+
+2. **Detect hidden goal progress:** For each quarterly goal, search across all meeting notes and tasks:
+   ```
+   qmd query "goal success criteria" --limit 5
+   ```
+   Find work that advanced the goal but wasn't explicitly linked.
+   - Example: Goal "Expand EMEA presence" — QMD finds 4 meetings about European partnerships and 2 tasks about localization that were never formally linked.
+
+3. **Cross-goal connections:** Search for themes that span multiple goals:
+   ```
+   qmd query "recurring theme from the quarter" --limit 5
+   ```
+   Surface patterns like "Customer feedback kept driving both your product and content goals."
+
+**Integration:** Add a "Semantic Discoveries" subsection under each goal assessment showing work that contributed but wasn't explicitly tracked. Also add a "Cross-Goal Themes" section to the quarterly review output.
+
+**If QMD unavailable:** Skip silently. Goal assessment still works from explicit data.
+
+---
+
 ## Step 3: Goal Assessment
 
 For each goal from `01-Quarter_Goals/Quarter_Goals.md`:

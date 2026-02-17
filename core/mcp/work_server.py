@@ -33,6 +33,13 @@ from mcp.server.models import InitializationOptions
 import mcp.server.stdio
 import mcp.types as types
 
+# QMD semantic search (optional - gracefully degrade if not available)
+try:
+    from utils.qmd_query import is_qmd_available, vault_search
+    HAS_QMD = True
+except ImportError:
+    HAS_QMD = False
+
 # Analytics helper (optional - gracefully degrade if not available)
 try:
     from analytics_helper import fire_event as _fire_analytics_event
@@ -1696,34 +1703,68 @@ def get_all_tasks() -> List[Dict[str, Any]]:
     return all_tasks
 
 def find_similar_tasks(item: str, existing_tasks: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
-    """Find tasks similar to the given item"""
+    """Find tasks similar to the given item.
+    
+    Uses QMD semantic search when available for meaning-based dedup
+    (e.g., "Review Q1 metrics" matches "Check quarterly pipeline numbers").
+    Falls back to keyword overlap when QMD is not installed.
+    """
     similar = []
+    
+    # --- QMD semantic dedup (if available) ---
+    qmd_matches = set()
+    if HAS_QMD and is_qmd_available():
+        try:
+            results = vault_search(
+                query=item,
+                limit=5,
+                min_score=0.3,
+                fallback_glob="03-Tasks/**/*.md",
+                fallback_grep=item.split()[0] if item.split() else None
+            )
+            for r in results:
+                snippet = r.get('snippet', '')
+                filepath = r.get('filepath', '')
+                score = r.get('score', 0)
+                # Only care about task file matches
+                if 'Tasks' in filepath and score >= 0.4:
+                    qmd_matches.add(snippet[:80].strip())
+        except Exception:
+            pass  # Fall through to keyword matching
+    
+    # --- Standard keyword + sequence matching ---
     item_keywords = extract_keywords(item)
     
     for task in existing_tasks:
-        # Skip completed tasks
         if task.get('completed') or task.get('status') == 'd':
             continue
         
         title = task.get('title', '')
         title_similarity = calculate_similarity(item, title)
         
-        # Calculate keyword overlap
         task_keywords = extract_keywords(title)
         if item_keywords and task_keywords:
             keyword_overlap = len(item_keywords & task_keywords) / len(item_keywords | task_keywords)
         else:
             keyword_overlap = 0
         
-        # Combined score
-        similarity_score = (title_similarity * 0.7) + (keyword_overlap * 0.3)
+        # Boost score if QMD also flagged this task as semantically similar
+        qmd_boost = 0.0
+        if qmd_matches:
+            for qmd_snippet in qmd_matches:
+                if title.lower() in qmd_snippet.lower() or qmd_snippet.lower() in title.lower():
+                    qmd_boost = 0.15
+                    break
+        
+        similarity_score = (title_similarity * 0.6) + (keyword_overlap * 0.25) + qmd_boost
         
         if similarity_score >= DEDUP_CONFIG['similarity_threshold']:
             similar.append({
                 'title': title,
                 'section': task.get('section', ''),
                 'source': task.get('source', ''),
-                'similarity_score': round(similarity_score, 2)
+                'similarity_score': round(similarity_score, 2),
+                'semantic_match': qmd_boost > 0
             })
     
     similar.sort(key=lambda x: x['similarity_score'], reverse=True)
@@ -2116,6 +2157,30 @@ def get_meeting_context_data(meeting_title: str = None, attendees: List[str] = N
                             'related_to': attendee
                         })
     
+    # --- QMD: Surface thematically related past discussions ---
+    result['semantic_context'] = []
+    if HAS_QMD and is_qmd_available() and meeting_title:
+        try:
+            sem_results = vault_search(
+                query=meeting_title,
+                limit=5,
+                min_score=0.3,
+                fallback_glob="00-Inbox/Meetings/**/*.md"
+            )
+            for r in sem_results:
+                filepath = r.get('filepath', '')
+                snippet = r.get('snippet', '')
+                score = r.get('score', 0)
+                # Only include meeting notes and project files as related context
+                if any(d in filepath for d in ['Meetings', 'Projects', 'Week_Priorities']) and score >= 0.35:
+                    result['semantic_context'].append({
+                        'filepath': filepath,
+                        'snippet': snippet[:200],
+                        'relevance_score': round(score, 2)
+                    })
+        except Exception:
+            pass  # Graceful degradation
+    
     # Generate prep suggestions
     if result['outstanding_tasks']:
         result['prep_suggestions'].append(f"Review {len(result['outstanding_tasks'])} outstanding tasks with attendees")
@@ -2125,6 +2190,9 @@ def get_meeting_context_data(meeting_title: str = None, attendees: List[str] = N
     
     if result['related_company']:
         result['prep_suggestions'].append(f"Review company page: {result['related_company']['name']}")
+    
+    if result['semantic_context']:
+        result['prep_suggestions'].append(f"Review {len(result['semantic_context'])} related past discussions (semantic match)")
     
     return result
 
@@ -2854,7 +2922,46 @@ async def handle_call_tool(
         return result
     except Exception as e:
         if _HAS_HEALTH:
-            _log_health_error("work-mcp", str(e), context={"tool": name})
+            _tool_human_messages = {
+                "list_tasks": "Task listing failed",
+                "create_task": "Task creation failed",
+                "update_task_status": "Task status update failed",
+                "get_system_status": "System status check failed",
+                "check_priority_limits": "Priority limits check failed",
+                "process_inbox_with_dedup": "Inbox processing failed",
+                "get_blocked_tasks": "Blocked tasks lookup failed",
+                "suggest_focus": "Focus suggestion failed",
+                "get_pillar_summary": "Pillar summary failed",
+                "sync_task_refs": "Task reference sync failed",
+                "refresh_company": "Company page refresh failed",
+                "list_companies": "Company listing failed",
+                "create_company": "Company creation failed",
+                "create_quarterly_goal": "Quarterly goal creation failed",
+                "get_quarterly_goals": "Quarterly goals lookup failed",
+                "get_goal_status": "Goal status lookup failed",
+                "update_goal_progress": "Goal progress update failed",
+                "create_weekly_priority": "Weekly priority creation failed",
+                "get_week_priorities": "Weekly priorities lookup failed",
+                "complete_weekly_priority": "Weekly priority completion failed",
+                "get_work_summary": "Work summary failed",
+                "check_goal_alignment": "Goal alignment check failed",
+                "get_quarter_velocity": "Quarter velocity calculation failed",
+                "migrate_quarterly_goals": "Quarterly goals migration failed",
+                "migrate_weekly_priorities": "Weekly priorities migration failed",
+                "get_weekly_planning_context": "Weekly planning context failed",
+                "get_week_progress": "Week progress check failed",
+                "get_meeting_context": "Meeting context lookup failed",
+                "get_commitments_due": "Commitments lookup failed",
+                "classify_task_effort": "Task effort classification failed",
+                "analyze_calendar_capacity": "Calendar capacity analysis failed",
+                "suggest_task_scheduling": "Task scheduling suggestion failed",
+            }
+            _log_health_error(
+                source="work-mcp",
+                message=str(e),
+                human_message=_tool_human_messages.get(name, f"Work tool '{name}' failed"),
+                context={"tool": name},
+            )
         raise
 
 async def _handle_call_tool_inner(

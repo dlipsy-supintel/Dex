@@ -187,7 +187,43 @@ Match tasks to available time based on effort classification:
 > 
 > ⚠️ **Heads up:** You have 2 deep work tasks but today's too fragmented. Consider protecting tomorrow morning."
 
-### 5.6 Standard Context Gathering
+### 5.6 Semantic Context Enrichment (if QMD available)
+
+**This step runs automatically when QMD is installed via `/enable-semantic-search`.** It adds a semantic search layer on top of the standard context gathering to surface connections that keyword search misses.
+
+Check if QMD MCP tools are available by calling `qmd_status`. **If available:**
+
+1. **For each meeting today**, run:
+   ```
+   qmd_search(query="[meeting topic] [attendee names]", limit=3)
+   ```
+   Surface: past discussions, related decisions, relevant commitments that share **meaning** but not keywords with this meeting. Example: a meeting about "customer onboarding" finds notes about "activation rates" and "time to value".
+
+2. **For each weekly priority that's lagging**, run:
+   ```
+   qmd_search(query="[priority description]", limit=3)
+   ```
+   Surface: vault content that advances or relates to this priority but wouldn't appear in a keyword search. Especially useful for finding forgotten context about stalled work.
+
+3. **Cross-topic connection scan:**
+   ```
+   qmd_search(query="[today's key themes combined]", limit=5)
+   ```
+   Surface: unexpected connections between today's meetings, tasks, and priorities. This is where semantic search shines — finding that a 2pm customer call relates to a PRD you wrote last month using completely different terminology.
+
+4. **Merge with existing context** — only add genuinely new insights. Don't duplicate what Steps 5.1-5.5 already found. Mark semantic results with their source so the plan output can distinguish them.
+
+**What this enables in the plan output:**
+- Meeting context sections include "**Also relevant:**" with thematically related past discussions
+- Priority recommendations cite relevant vault content discovered by meaning
+- "Heads Up" section catches connections between seemingly unrelated items
+- Focus recommendations are informed by deeper vault knowledge
+
+**If QMD is not available:** Skip silently. Steps 5.1-5.5 and 5.7 provide full context via standard methods.
+
+---
+
+### 5.7 Standard Context Gathering
 
 Also gather:
 - **Calendar**: Today's meetings with times and attendees

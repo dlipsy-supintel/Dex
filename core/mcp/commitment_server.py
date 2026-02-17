@@ -27,6 +27,13 @@ from mcp.server import NotificationOptions, Server
 from mcp.types import Resource, Tool, TextContent
 import mcp.server.stdio
 
+# QMD semantic search (optional - gracefully degrade if not available)
+try:
+    from utils.qmd_query import is_qmd_available, vault_search
+    HAS_QMD = True
+except ImportError:
+    HAS_QMD = False
+
 # Health system — error queue and health reporting
 try:
     sys.path.insert(0, str(Path(__file__).parent.parent.parent))
@@ -301,12 +308,18 @@ def list_projects() -> list[dict]:
     return projects
 
 def match_to_vault_context(text: str, detected_person: Optional[str] = None) -> dict:
-    """Match commitment text to people, projects, and goals."""
+    """Match commitment text to people, projects, and goals.
+    
+    Uses QMD semantic search when available for meaning-based matching
+    (e.g., "I'll send the cost breakdown" matches a project about pricing).
+    Falls back to keyword matching when QMD is not installed.
+    """
     matches = {
         "person_page": None,
         "project": None,
         "goal": None,
-        "company": None
+        "company": None,
+        "semantic_context": []
     }
     
     text_lower = text.lower()
@@ -315,7 +328,6 @@ def match_to_vault_context(text: str, detected_person: Optional[str] = None) -> 
     people = list_people_pages()
     for person in people:
         name_parts = person["name"].lower().split()
-        # Match if any name part appears in text or detected_person
         if any(part in text_lower for part in name_parts):
             matches["person_page"] = person["path"]
             break
@@ -331,7 +343,40 @@ def match_to_vault_context(text: str, detected_person: Optional[str] = None) -> 
             matches["project"] = project["path"]
             break
     
-    # TODO: Match goals and companies
+    # --- QMD semantic matching (if available) ---
+    if HAS_QMD and is_qmd_available():
+        try:
+            results = vault_search(
+                query=text,
+                limit=5,
+                min_score=0.3,
+                fallback_glob="04-Projects/**/*.md"
+            )
+            for r in results:
+                filepath = r.get('filepath', '')
+                score = r.get('score', 0)
+                snippet = r.get('snippet', '')
+                
+                if score >= 0.35:
+                    # Try to match to project if not already matched
+                    if not matches["project"] and 'Projects' in filepath:
+                        matches["project"] = filepath
+                    
+                    # Try to match to goal if not already matched
+                    if not matches["goal"] and 'Quarter_Goals' in filepath:
+                        matches["goal"] = filepath
+                    
+                    # Try to match to company if not already matched
+                    if not matches["company"] and ('Companies' in filepath or 'Key_Accounts' in filepath):
+                        matches["company"] = filepath
+                    
+                    matches["semantic_context"].append({
+                        'filepath': filepath,
+                        'snippet': snippet[:150],
+                        'score': round(score, 2)
+                    })
+        except Exception:
+            pass  # Graceful degradation
     
     return matches
 
@@ -560,7 +605,12 @@ async def handle_call_tool(name: str, arguments: dict):
         return await _handle_call_tool_inner(name, arguments)
     except Exception as e:
         if _HAS_HEALTH:
-            _log_health_error("commitment-mcp", str(e), context={"tool": name})
+            _log_health_error(
+                source="commitment-mcp",
+                message=str(e),
+                human_message=f"Commitment tool '{name}' failed",
+                context={"tool": name}
+            )
         raise
 
 async def _handle_call_tool_inner(name: str, arguments: dict):

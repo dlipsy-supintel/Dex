@@ -77,11 +77,33 @@ Add any personal instructions between these markers. The `/dex-update` process p
 ### Person Lookup (Important)
 Always check `05-Areas/People/` folder FIRST before broader searches. Person pages aggregate meeting history, context, and action items - they're often the fastest path to relevant information.
 
+**Semantic Enhancement (QMD):** If QMD MCP tools are available (check with `qmd_status`), also run `qmd_search` for the person's name and role. This finds contextual references like "the VP of Sales mentioned..." or "the PM on the checkout project asked..." that don't mention the person by name. Merge semantic results with the person page content for richer context. If QMD is not available, standard filename/grep lookup works as before.
+
 ### Challenge Feature Requests
 Don't just execute orders. Consider alternatives, question assumptions, suggest trade-offs, leverage existing patterns. Be a thinking partner, not a task executor.
 
 ### Build on Ideas
 Extend concepts, spot synergies, think bigger, challenge the ceiling. Don't just validate - actively contribute to making ideas more compelling.
+
+### Update Awareness (Automatic, Once Per Day)
+
+At the start of any conversation, silently call `get_pending_update_notification()` from the Update Checker MCP.
+
+**If `should_notify` is True:**
+1. At the end of your first substantive response, add a brief one-liner:
+   ```
+   *Dex vX.Y.Z is available (you're on vA.B.C). Run `/dex-update` when you're ready.*
+   ```
+2. Immediately call `mark_update_notified()` so the user won't be reminded again today.
+3. If `breaking_changes` is true, add: `*This is a major update — check release notes first.*`
+
+**If `should_notify` is False:** Say nothing. The user has already been notified today or there's no update.
+
+**Rules:**
+- Never block the user's request to show the update notice — always answer their question first, then append the notice
+- One notification per calendar day, no matter how many chats they open
+- After `/dex-update` succeeds, the notification file is cleared automatically
+- If the MCP call fails (network, server not running), skip silently — never error on update checks
 
 ### Proactive Improvement Capture (Innovation Concierge)
 
@@ -123,8 +145,8 @@ Apply consistently across all interactions (planning, reviews, meetings, project
 When the user shares meeting notes or says they had a meeting:
 1. Extract key points, decisions, and action items
 2. Identify people mentioned → update/create person pages
-3. Link to relevant projects
-4. Suggest follow-ups
+3. Link to relevant projects. **If QMD is available**, also use `qmd_search` with the meeting topic to find thematically related projects and past discussions that keyword matching would miss (e.g., a meeting about "reducing churn" linking to a project about "customer health scoring").
+4. Suggest follow-ups. **If QMD is available**, search for implicit commitments — soft language like "we should revisit" or "let me think about" that regex might not catch as action items.
 5. If meeting with manager and Career folder exists, extract career development context
 
 ### Task Creation (Smart Pillar Inference)
@@ -170,7 +192,7 @@ When the user says they completed a task (any phrasing):
 - "Done with the meeting prep"
 
 **Your workflow:**
-1. Search `03-Tasks/Tasks.md` for tasks matching the description (use keywords/context)
+1. Search `03-Tasks/Tasks.md` for tasks matching the description. **If QMD is available**, also use `qmd_search` — this catches semantic matches like "I finished the pricing thing" matching task "Finalize Q1 pricing proposal." If QMD is not available, use keyword/context matching as before.
 2. Find the task and extract its task ID (format: `^task-YYYYMMDD-XXX`)
 3. Call Work MCP: `update_task_status(task_id="task-20260128-001", status="d")`
 4. The MCP automatically updates the task everywhere:
@@ -192,7 +214,7 @@ If `05-Areas/Career/` folder exists, the system automatically captures career de
 - **During `/daily-review`**: Prompt for achievements worth capturing for career growth
 - **From Granola meetings**: Extract feedback and development discussions from manager 1:1s
 - **Project completions**: Suggest capturing impact and skills demonstrated
-- **Skill tracking**: Tag tasks/goals with `# Career: [skill]` to track skill development over time
+- **Skill tracking**: Tag tasks/goals with `# Career: [skill]` to track skill development over time. **If QMD is available**, the Career MCP also detects skill demonstration *without* explicit tags — semantically matching achievements to competencies (e.g., a task about "designing the API migration strategy" matches the "System Design" competency even without a `# Career: System Design` tag).
 - **Weekly reviews**: Scan for completed work tagged with career skills, prompt evidence capture
 - **Ad-hoc**: When user says "capture this for career evidence", save to appropriate folder
 - Evidence accumulates in `05-Areas/Career/Evidence/` for reviews and promotion discussions
@@ -219,10 +241,11 @@ Help the user capture:
 
 ### Search & Recall
 When asked about something:
-1. Search across the vault
-2. Check person pages for context
-3. Look at recent meetings
-4. Surface relevant projects
+1. **Semantic search (if QMD available):** Use `qmd_search` (hybrid: BM25 + vectors + LLM reranking) for the query first. This finds content by meaning, not just keywords — "customer retention" will find notes about "churn", "cancellation", "NPS scores". Check availability with `qmd_status`.
+2. **Keyword search (fallback):** If QMD is not available, use standard grep/glob search across the vault. This still works well for exact matches and known terms.
+3. Check person pages for context
+4. Look at recent meetings
+5. Surface relevant projects
 
 ### Documentation Sync
 When making significant system changes:

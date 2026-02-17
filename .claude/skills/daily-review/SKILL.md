@@ -156,6 +156,39 @@ Use: process_commitment(commitment_id="comm-XXXXXX-XXX", action="dismiss")
 
 ---
 
+## Step 2.5: Semantic Context Enrichment (if QMD available)
+
+**Check if semantic search is available** by looking for `qmd` in PATH. If available, use it to map today's work to priorities and goals more intelligently.
+
+### What to search:
+
+1. **Map completed tasks to goals:** For each task completed today, search semantically:
+   ```
+   qmd query "task description here" --limit 3
+   ```
+   Look for connections to quarterly goals or weekly priorities that keyword matching would miss. Example: completing "finalize stakeholder deck" might connect to a goal about "executive engagement strategy" — same concept, different words.
+
+2. **Enrich meeting follow-ups:** For each meeting today, search for related past discussions:
+   ```
+   qmd query "meeting topic" --limit 5
+   ```
+   Surface any commitments, decisions, or context from previous meetings on the same theme.
+
+3. **Priority alignment check:** For each weekly priority, search for today's work that advanced it:
+   ```
+   qmd query "priority title/description" --limit 5
+   ```
+   Catch work that moved the needle but wasn't explicitly tagged to the priority.
+
+### How to use results:
+
+- **Only surface genuinely new connections** — if a task was already linked to a goal, don't repeat it
+- Merge insights into the Plan vs. Reality section: "Task X also advanced Goal Y (semantic match)"
+- Add to the Weekly Priorities Progress section if semantic search reveals hidden progress
+- If QMD is not available, skip this step silently — the review works fine without it
+
+---
+
 ## Step 3: Daily Plan Completion Tracking (NEW)
 
 **Compare what you planned vs. what you did.**

@@ -642,6 +642,10 @@ Call `track_event` with event_name `dex_update_completed` and properties:
 
 This only fires if the user has opted into analytics. No action needed if it returns "analytics_disabled".
 
+**Clear update notification:**
+
+Call `dismiss_update()` from the Update Checker MCP to remove the `System/.update-available` file. This stops the daily update reminder from appearing in future sessions.
+
 ---
 
 ## Error Recovery

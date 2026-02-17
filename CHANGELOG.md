@@ -1,8 +1,58 @@
+
 # Changelog
 
 All notable changes to Dex will be documented in this file.
 
 **For users:** Each entry explains what was frustrating before, what's different now, and why you'll care.
+
+---
+
+## [1.9.0] - 2026-02-17
+
+### 🔍 Optional: Smarter Search for Growing Vaults
+
+You might be thinking: "Dex already uses AI — doesn't it search intelligently?" Good question. Here's what's actually happening under the hood.
+
+When you ask Dex something like "what do I know about customer retention?", two things happen:
+
+1. **Finding the files** — Dex searches your vault for relevant notes
+2. **Making sense of them** — Claude reads those notes and gives you a smart answer
+
+Step 2 has always been intelligent — that's Claude doing what it does best. But Step 1? Until now, that's been basic keyword matching. Dex literally searches for the word "retention" in your files. If you wrote about the same topic using different words — "churn", "users leaving", "cancellation patterns" — those notes never made it to Claude's desk. It can't reason about things it never sees.
+
+**That's what semantic search fixes.** It upgrades Step 1 — the finding — so the right notes reach Claude even when the words don't match.
+
+It's also significantly faster and lighter. Instead of Claude reading entire files to find what's relevant (thousands of tokens each), the search engine returns just the relevant snippets. One developer measured a 96% reduction in the amount of context needed per search.
+
+**When does this matter?** Honestly, if your vault has fewer than 50 notes, keyword matching works fine. As your vault grows into the hundreds of files, keyword search starts missing things — and that's where this upgrade earns its keep.
+
+---
+
+This is powered by [QMD](https://github.com/tobi/qmd), an open-source local search engine created by Tobi Lütke (founder and CEO of Shopify). Everything runs on your machine — no data leaves your computer.
+
+> "I think QMD is one of my finest tools. I use it every day because it's the foundation of all the other tools I build for myself. A local search engine that lives and executes entirely on your computer. Both for you and agents." — [Tobi Lütke](https://x.com/tobi/status/2013217570912919575)
+
+**This is optional.** It requires downloading AI models (~2GB) that run locally on your machine. No API keys, no cloud services. Run `/enable-semantic-search` when you're ready — or skip it entirely.
+
+**What gets better when you enable it:**
+
+- **Planning & Reviews** — `/daily-plan`, `/week-plan`, `/daily-review`, `/week-review`, and `/quarter-review` all become meaning-aware. Your morning plan surfaces notes related to today's meetings by theme ("onboarding" pulls in "activation rates"). Your weekly review detects which tasks contributed to which goals — even when they weren't explicitly linked. Stale goals get flagged with hidden activity you didn't know about.
+
+- **Meeting Intelligence** — `/meeting-prep` finds past discussions related to the meeting topic, not just meetings with the same people. `/process-meetings` catches implicit commitments like "we should circle back on pricing" — soft language that keyword extraction misses.
+
+- **Search & People** — All vault searches become meaning-aware. Person lookup finds references by role ("the VP of Sales asked about..."), not just by name.
+
+- **Smarter Dedup** — Task creation detects semantic duplicates ("Review Q1 metrics" matches "Check quarterly pipeline numbers"). Same for improvement ideas in your backlog.
+
+- **Natural Task Completion** — Say "I finished the pricing thing" and Dex matches it to the right task, even when your words don't match the title exactly.
+
+- **Career Tracking** — If you use the career system, skill demonstration is now detected without explicit `# Career:` tags. "Designed the API migration strategy" automatically matches your "System Design" competency.
+
+**If you don't enable it,** nothing changes — everything continues to work with keyword matching, just as it always has.
+
+Part of our philosophy with Dex is to stay on top of the best open-source tools so you don't have to. When something like QMD comes along that genuinely makes the experience better, we integrate it — you run one command and your existing workflows get smarter.
+
+**To enable:** `/enable-semantic-search` (one-time setup, ~5 minutes)
 
 ---
 

@@ -118,7 +118,37 @@ Get intelligent matching:
 > 
 > ⚠️ **Capacity gap:** Consider deferring 2 deep work items or protecting more time."
 
-### 2.6 Commitments and Follow-ups
+### 2.6 Semantic Goal Intelligence (if QMD available)
+
+**Check if semantic search is available** by looking for `qmd` in PATH.
+
+If available, enhance priority suggestions with meaning-based analysis:
+
+1. **Find stale goals with hidden activity:** For each stalled quarterly goal, search:
+   ```
+   qmd query "goal description/success criteria" --limit 5
+   ```
+   against recent tasks and meeting notes. Sometimes goals appear stalled because related work wasn't explicitly linked.
+   - Example: Goal "Build partner ecosystem" shows no linked tasks, but QMD finds 3 meetings about "integration partnerships" and a task about "API documentation for vendors."
+
+2. **Suggest priorities that move stalled goals:** For goals with no recent activity:
+   ```
+   qmd query "goal title concepts" --limit 3
+   ```
+   against open tasks. Surface tasks that could advance the goal semantically.
+   - "You have an open task 'Review vendor onboarding flow' — this could advance your stalled goal 'Build partner ecosystem'"
+
+3. **Detect priority conflicts:** Search for semantic overlap between candidate priorities:
+   ```
+   qmd query "priority A description" --limit 3
+   ```
+   If two priorities are semantically very similar, suggest merging them.
+
+**Integration:** Fold findings into the "Intelligent Priority Suggestions" in Step 3. Label semantic discoveries: "🔍 *Detected via semantic search*"
+
+**If QMD unavailable:** Skip silently. Priority suggestions still work from explicit goal links.
+
+### 2.7 Commitments and Follow-ups
 
 ```
 Use: get_commitments_due(date_range="this_week")
