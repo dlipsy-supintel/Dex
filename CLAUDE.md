@@ -452,6 +452,7 @@ Skills extend Dex capabilities and are invoked with `/skill-name`. Common skills
 - `/project-health`, `/product-brief` - Projects
 - `/career-coach`, `/resume-builder` - Career development
 - `/ai-setup`, `/ai-status` - Configure budget cloud models (80% cheaper) and offline mode
+- `/enable-semantic-search` - Enable local AI-powered semantic search with smart collection discovery
 - `/xray` - AI education: understand what just happened under the hood (context, MCPs, hooks)
 - `/dex-level-up`, `/dex-backlog`, `/dex-improve` - System improvements
 - `/dex-update` - Update Dex automatically (shows what's new, updates if confirmed, no technical knowledge needed)

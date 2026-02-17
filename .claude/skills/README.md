@@ -219,6 +219,7 @@ Built specifically for personal knowledge management and productivity workflows 
 - `/screenpipe-disable` - Stop screen capture and optionally delete data
 
 **System Management:**
+- `/enable-semantic-search` - Enable local AI-powered semantic search with smart collection discovery
 - `/xray` - AI education: understand what just happened under the hood, learn how context, MCPs, hooks work
 - `/prompt-improver` - Transform vague prompts via Anthropic Messages API
 - `/dex-level-up` - Discover unused features
