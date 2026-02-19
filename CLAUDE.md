@@ -39,13 +39,14 @@ The system automatically suggests `/getting-started` at next session if vault < 
 
 ## User Profile
 
-<!-- Updated during onboarding -->
-**Name:** Not yet configured
-**Role:** Not yet configured
-**Company Size:** Not yet configured
+<!-- Updated during setup -->
+**Name:** Dan
+**Role:** COO
+**Company Size:** Startup (1-100)
 **Working Style:** Not yet configured
 **Pillars:**
-- Not yet configured
+- Finish RR Toolbox 2.1 installer (revenue-linked)
+- SmartBracket launch (mid-March): marketing help, collateral, strong competition execution
 
 ---
 

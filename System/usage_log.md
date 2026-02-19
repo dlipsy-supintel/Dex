@@ -8,7 +8,7 @@
 
 ## Core Workflows (8 features)
 
-- [ ] Daily planning (`/daily-plan`)
+- [x] Daily planning (`/daily-plan`)
 - [ ] Daily review (`/review` or `/daily-review`)
 - [ ] Weekly planning (`/week-plan`)
 - [ ] Weekly review (`/week-review`)
@@ -25,7 +25,7 @@
 - [ ] Person page created
 - [ ] Person page updated
 - [ ] Company page created
-- [ ] Granola connected
+- [x] Granola connected
 
 ## Task Management (6 features)
 
@@ -77,7 +77,7 @@
 
 - [ ] Calendar connected (via Calendar MCP)
 - [ ] Calendar synced daily
-- [ ] Granola connected (via Granola MCP)
+- [x] Granola connected (via Granola MCP)
 - [ ] Obsidian enabled (`/dex-obsidian-setup`)
 - [ ] ScreenPipe enabled (`/screenpipe-setup`)
 - [ ] ScreenPipe used (`/screen-recall` or `/screen-summary`)

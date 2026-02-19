@@ -14,15 +14,24 @@
 #
 # The Work MCP uses these to categorize tasks and check balance across your work.
 
-pillars: []
-  # Will be populated during onboarding
-  # Example structure:
-  # - id: pillar_id
-  #   name: "Pillar Name"
-  #   description: "What this pillar represents"
-  #   keywords:
-  #     - keyword1
-  #     - keyword2
+pillars:
+  - id: rr_toolbox_installer
+    name: "Finish RR Toolbox 2.1 installer"
+    description: "Ship the RR Toolbox 2.1 installer with personal revenue impact"
+    keywords:
+      - rr toolbox
+      - installer
+      - rapid recursive
+      - revenue
+  - id: smartbracket_launch
+    name: "SmartBracket launch (mid-March)"
+    description: "Bring on marketing help, share collateral, execute strong SmartBracket competition"
+    keywords:
+      - smartbracket
+      - launch
+      - marketing
+      - march madness
+      - bracket
 
 # Priority limits (how many active tasks per priority level)
 priority_limits:

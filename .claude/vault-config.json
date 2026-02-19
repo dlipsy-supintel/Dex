@@ -1,0 +1,21 @@
+{
+  "user": {
+    "name": "Dan",
+    "role": "COO",
+    "company": "Supported Intelligence LLC",
+    "companySize": "startup",
+    "pillars": [
+      "Finish RR Toolbox 2.1 installer (revenue-linked)",
+      "SmartBracket launch (mid-March): marketing help, collateral, strong competition execution"
+    ],
+    "profileContext": {
+      "linkedin": "https://www.linkedin.com/in/danlipsy/",
+      "companyWebsite": "https://www.supportedintelligence.com",
+      "smartbracketWebsite": "https://www.smartbracket.io",
+      "techShowcase": "https://smart-bracket-analysis.vercel.app/tech-showcase.html",
+      "decisionModels": "https://supportedintelligence.com/models",
+      "background": "5+ years product management, 12+ years software development, President & COO at Supported Intelligence LLC. Rapid Recursive® technology, RR Toolbox, SmartBracket."
+    }
+  },
+  "createdAt": "2026-02-17"
+}
