@@ -51,6 +51,15 @@ try:
 except ImportError:
     _HAS_HEALTH = False
 
+# Timezone detection
+try:
+    from core.utils.timezone import detect_system_timezone
+    _HAS_TIMEZONE = True
+except ImportError:
+    _HAS_TIMEZONE = False
+    def detect_system_timezone():
+        return ""
+
 # Set up logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -389,6 +398,13 @@ def create_user_profile(session_data: Dict) -> bool:
         
         # Update Obsidian mode (defaults to false)
         profile['obsidian_mode'] = data.get('obsidian_mode', False)
+        
+        # Auto-detect timezone if not already set
+        if not profile.get('timezone'):
+            detected_tz = detect_system_timezone()
+            if detected_tz:
+                profile['timezone'] = detected_tz
+                logger.info(f"Auto-detected timezone: {detected_tz}")
         
         # Update communication preferences
         comm = data.get('communication', {})
