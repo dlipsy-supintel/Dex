@@ -38,13 +38,25 @@ The short version: Dex remembers things now. It gets smarter each day you use it
 
 ### 🙏 Community
 
-This is the first time Dex has received contributions from the community, and I'm genuinely humbled. Three people independently found things to improve, wrote the code, and shared it back.
+This is the first time Dex has received contributions from the community, and I'm genuinely humbled. Three people independently found things to improve, wrote the code, and shared it back. All four contributions are now live.
 
-- **@fonto** — Fixed the calendar setup skill so `/calendar-setup` actually works, and caught a bug where task IDs could collide across days. Two solid fixes that make Dex more reliable for everyone.
-- **@acottrell** — Wrote a clear, non-technical guide for connecting Google Calendar on Mac. Filled a gap I hadn't even documented yet. (And thank you for the kind words.)
-- **@mekuhl** — Built an Apple Reminders integration that lets you capture tasks via Siri on your phone and have them flow into Dex. Currently under review — coming in a future release.
+**@fonto — Calendar setup fix.** The `/calendar-setup` skill wasn't recognised as a command because the file was in the wrong folder structure. On top of that, the EventKit permission script was crashing when it tried to request calendar access — passing the wrong type to macOS. Both fixed. If you had trouble setting up your calendar before, try again now.
 
-If you've made improvements to your Dex setup that could help others, we'd love to see them. See [CONTRIBUTING.md](CONTRIBUTING.md) for how to share — no technical background required.
+**@fonto — Task ID uniqueness.** Task IDs use a counter (the `003` in `task-20260219-003`). That counter was resetting to 001 each day, which meant if you referenced tasks by their short number, you could get collisions between tasks created on different days. The counter is now globally unique across all dates.
+
+**@acottrell — Google Calendar setup guide for Mac.** A clear, non-technical guide that answers the question every Mac user has: "How do I connect my Google Calendar to Dex?" The answer is simpler than you'd think — add Google to Apple's Calendar app, grant Cursor calendar access, done. Two steps. No API keys. This also improved the EventKit script to request permission on first use, so your calendar just works when you run `/daily-plan` for the first time. (And thank you for the kind words about the project.)
+
+**@mekuhl — Apple Reminders integration.** This is the big one. You can now say **"Hey Siri, add to Dex Inbox: follow up with Sarah about pricing"** on your phone, and it flows into Dex. Here's how it works:
+
+- Siri creates a Reminder in a list called "Dex Inbox" (just a regular Reminders list on your phone)
+- Next time you run `/daily-plan`, Dex reads that list and surfaces your captures for triage
+- You assign a pillar and priority, it becomes a proper task, and the Reminder gets marked complete
+
+It works the other direction too. After your daily plan generates, your P0 and P1 focus tasks get pushed to a "Dex Today" Reminders list on your phone. You get native iOS notifications for your most important work. Complete a task on your phone? Dex picks up the completion during your evening review. Complete it in Dex? The Reminder clears automatically.
+
+No API keys, no cloud service, no new apps to install. Just Siri and Reminders — tools already on your phone — as the bridge to your vault.
+
+If you've made improvements to your Dex setup that could help others, Dave would love to see them. See [CONTRIBUTING.md](CONTRIBUTING.md) for how to share — no technical background required.
 
 ---
 

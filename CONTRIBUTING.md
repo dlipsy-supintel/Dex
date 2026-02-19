@@ -1,6 +1,6 @@
 # Contributing to Dex
 
-You've been using Dex. Maybe you fixed something that was bugging you. Maybe you built a new skill, connected a new tool, or wrote a guide that would've saved you an hour on day one. Whatever it is — we'd love to see it.
+You've been using Dex. Maybe you fixed something that was bugging you. Maybe you built a new skill, connected a new tool, or wrote a guide that would've saved you an hour on day one. Whatever it is — Dave would love to see it.
 
 **You don't need to be a developer to contribute.** If you can use Dex, you can share improvements. Claude will help you with the technical bits.
 
@@ -30,7 +30,7 @@ Anything that makes Dex better for someone else:
 
 3. Claude will walk you through it — creating a branch, describing what you changed, and submitting it. You don't need to know what any of those words mean. Just follow along.
 
-4. **Your changes appear on GitHub** for review. We'll take a look, give feedback if needed, and merge it in.
+4. **Your changes appear on GitHub** for review. Dave will take a look, give feedback if needed, and merge it in.
 
 That's it. Claude handles the git mechanics. You just describe what you changed and why.
 
@@ -44,7 +44,7 @@ That's it. Claude handles the git mechanics. You just describe what you changed 
 ### What to avoid
 
 - **Personal data.** Double-check that your real names, companies, emails, and meeting content aren't in the files you're sharing. Ask Claude: "Can you check these files for any personal information before I share them?"
-- **Breaking existing features.** If you're not sure whether your change might affect something else, mention that in your description. We'd rather know upfront.
+- **Breaking existing features.** If you're not sure whether your change might affect something else, mention that in your description. Dave would rather know upfront than discover it later.
 
 ---
 
@@ -52,12 +52,12 @@ That's it. Claude handles the git mechanics. You just describe what you changed 
 
 When you submit changes:
 
-1. **We'll review within a few days** — usually faster
-2. **We might ask questions** — not because something's wrong, just to understand your thinking
-3. **We might suggest tweaks** — small adjustments to fit Dex conventions
-4. **We'll merge it** — and credit you in the changelog
+1. **Dave will review within a few days** — usually faster
+2. **He might ask questions** — not because something's wrong, just to understand your thinking
+3. **He might suggest tweaks** — small adjustments to fit Dex conventions
+4. **He'll merge it** — and credit you in the changelog
 
-If your contribution adds a meaningful feature, we'll mention you by name in the release notes. Every contribution matters.
+If your contribution adds a meaningful feature, you'll be mentioned by name in the release notes. Every contribution matters.
 
 ---
 
