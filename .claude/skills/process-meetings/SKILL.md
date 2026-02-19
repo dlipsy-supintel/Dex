@@ -1,11 +1,27 @@
 ---
 name: process-meetings
 description: Process synced Granola meetings to update person pages, extract tasks, and organize meeting notes
+context: fork
+hooks:
+  PostToolUse:
+    - matcher: Write
+      type: command
+      command: "node .claude/hooks/post-meeting-person-update.cjs"
+  Stop:
+    - type: command
+      command: "node .claude/hooks/meeting-summary-generator.cjs"
 ---
 
 # Process Meetings
 
 Process meetings that have been synced from Granola by the background automation. Updates person pages, extracts tasks, and organizes meeting notes.
+
+## Background Execution
+
+This skill supports background execution. When invoked:
+1. Acknowledge: "Processing [N] meetings in the background. I'll let you know when done."
+2. Process all meetings
+3. On completion, provide summary: "[N] meetings processed. [X] person pages updated. [Y] action items created."
 
 ## How It Works
 

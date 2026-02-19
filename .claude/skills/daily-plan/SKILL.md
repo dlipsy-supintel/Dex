@@ -1,6 +1,11 @@
 ---
 name: daily-plan
 description: Generate context-aware daily plan with calendar, tasks, and priorities. Includes midweek awareness, meeting intelligence, commitment tracking, and smart scheduling suggestions.
+context: fork
+hooks:
+  Stop:
+    - type: command
+      command: "node .claude/hooks/daily-plan-quick-ref.cjs"
 ---
 
 ## Purpose
