@@ -7,15 +7,15 @@ All notable changes to Dex will be documented in this file.
 
 ---
 
-## [1.15.0] — The Integrations Release (2026-02-19)
+## [1.15.0] — 🔌 The Integrations Release (2026-02-19)
 
 This is a big one. Dex now connects to 8 tools where your real work happens — and it goes both ways. Complete a task in Dex and it's done in Todoist. Get an email flagged in your morning plan because someone hasn't replied in 3 days. See your Jira sprint status right next to your weekly priorities.
 
-Some of you have already been building your own MCP integrations using `/create-mcp` and `/integrate-mcp` — and honestly, that's impressive. But Dave kept hearing the same thing: "I just want to get up and running without figuring out the plumbing." So it's built in now.
+Some of you have already been building your own integrations using `/create-mcp` and `/integrate-mcp` — and honestly, that's impressive. But Dave kept hearing the same thing: "I just want to get up and running without figuring out the plumbing." So it's built in now.
 
 ---
 
-### 8 integrations, ready to go
+### 🔗 8 integrations, ready to go
 
 Each one takes a few minutes to set up. Run the command, answer a couple of questions, and you're connected. Dex tells you exactly what changed — which skills got smarter, what new capabilities unlocked.
 
@@ -33,17 +33,17 @@ Each one takes a few minutes to set up. Run the command, answer a couple of ques
 - **Zoom** (`/zoom-setup`) — Access recordings, schedule meetings. Smart enough to know if Granola already handles your meeting capture so they don't step on each other.
 - **Jira + Confluence** (`/atlassian-setup`) — Sprint status in your daily plan. Project health from Jira. Confluence docs surfaced during meeting prep.
 
-### Two-way task sync
+### 🔄 Two-way task sync
 
 This is the headline feature. Connect Todoist, Things 3, Trello, or Jira and your tasks flow between systems automatically. One task in Todoist maps to one task in Dex — even though Dex shows it in meeting notes, person pages, and project pages. Complete anywhere, done everywhere.
 
 The sync is safe by design — it creates, completes, and archives. It never deletes anything.
 
-### New users: pick your stack during onboarding
+### 👋 New users: pick your stack during onboarding
 
 When new users set up Dex, Step 8 now asks what tools they use. Pick Gmail and Todoist? You'll be walked through connecting both, and at the end Dex shows you exactly what changed: "Your daily plan now includes an email digest. Meeting prep shows recent emails with attendees. Tasks sync both ways with Todoist." Each tool connection ends with a clear summary of what just got smarter.
 
-### Existing users: add integrations anytime
+### ⚡ Existing users: add integrations anytime
 
 Already using Dex? Just run the setup command for any tool:
 
@@ -58,11 +58,11 @@ Already using Dex? Just run the setup command for any tool:
 
 Or run `/dex-level-up` and Dex will suggest which integrations would make the biggest difference based on what you're already doing.
 
-### Corporate environments and auth
+### 🏢 Corporate environments
 
-Some corporate IT policies restrict OAuth or API access for third-party tools. If you hit a wall during setup — a blocked consent screen, a missing permission, an admin-only API — just ask Dex about it. There are often creative workarounds: Chrome session tokens instead of OAuth, personal API keys that don't need admin approval, local-only integrations like Things 3 that bypass corporate auth entirely. Dex generally finds a way if you give it a go.
+Some corporate IT policies restrict access for third-party tools. If you hit a wall during setup — a blocked consent screen, a missing permission — just ask Dex about it. There are often creative workarounds: personal API keys that don't need admin approval, local-only integrations like Things 3 that bypass corporate restrictions entirely. Dex generally finds a way if you give it a go.
 
-### Smarter daily plans and meeting prep
+### 📋 Smarter daily plans and meeting prep
 
 Every skill that touches your day got more useful:
 
@@ -72,25 +72,25 @@ Every skill that touches your day got more useful:
 - **`/project-health`** surfaces Trello board status and Jira sprint health for connected projects.
 - **`/dex-level-up`** spots unused integration capabilities — "You connected Gmail but haven't enabled email follow-up detection. Try it."
 
-### Integration health
+### 🩺 Integration health
 
 Dex checks whether your connected tools are healthy each time you start a session. If something's gone stale — an expired token, a disconnected service — you'll know right away with a friendly nudge to reconnect, instead of discovering it mid-meeting-prep.
 
 ---
 
-## [1.14.0] — Dex Got a Brain Upgrade (2026-02-19)
+## [1.14.0] — 🧠 Dex Got a Brain Upgrade (2026-02-19)
 
 This is the biggest single release since semantic search. Dex remembers things now. It gets smarter each day you use it. Sessions stay fast all day. And your skills take care of their own housekeeping instead of leaving it to you.
 
 ---
 
-### Memory
+### 🧠 Memory
 
 **Cross-session memory.** When you start a new chat, Dex now opens with context from previous sessions — what you decided, what's been escalating, what commitments are due. No more re-explaining where you left off. Your daily plan opens with "Based on previous sessions: you discussed Acme Corp 3 times last week, decided to move to negotiation, and Sarah committed to send pricing by Friday — that's today." That context was invisible before. Now it's automatic.
 
 **Critical decisions persist.** When you make an important decision in a session — "decided to move Acme to negotiation by March" — it now survives across sessions. Critical decisions appear at every session start for 30 days, so you never lose track of what you committed to.
 
-**Meeting cache.** Every meeting you process now gets cached as a 50-token structured summary instead of a 2,000-token full note. Meeting prep and daily planning are dramatically faster — same intelligence, fraction of the token cost.
+**Meeting cache.** Every meeting you process now gets stored as a compact summary instead of the full transcript. Meeting prep and daily planning are dramatically faster — same intelligence, fraction of the processing time.
 
 **Memory that compounds.** The six agents that power your morning intelligence — deals, commitments, people, projects, focus, and pillar balance — now remember what they found in previous sessions. First run, they scan everything. Second run, they know what they already told you. Resolved items quietly drop off. New issues are clearly marked. And things you've been ignoring? Dex notices. "I've flagged this three sessions running. Still no action. This is a pattern, not a blip."
 
@@ -100,7 +100,7 @@ This is the biggest single release since semantic search. Dex remembers things n
 
 ---
 
-### Intelligence
+### 🔍 Intelligence
 
 **Pattern detection.** After 2+ weeks of use, Dex starts noticing your patterns. "You've prepped for deal calls 8 times this month but checked MEDDPICC gaps only twice." Recurring mistakes get surfaced before you make them. Emerging workflows get noticed so you can turn them into skills.
 
@@ -110,17 +110,17 @@ This is the biggest single release since semantic search. Dex remembers things n
 
 ---
 
-### Performance & Safety
+### ⚡ Performance & Safety
 
-**Sessions that last all day.** Your heaviest skills — daily plan, weekly review, meeting prep, and seven others — now run in isolated context. Previously, running `/daily-plan` loaded thousands of tokens of working data into your chat. If you stayed in that conversation for the rest of the day, everything got slower and muddier. Now each skill runs in its own space, does its work, and hands back just the result. Stay in one chat from morning planning through end-of-day review without penalty.
+**Sessions that last all day.** Your heaviest skills — daily plan, weekly review, meeting prep, and seven others — now run in their own space instead of loading everything into your main conversation. Previously, running `/daily-plan` then staying in that chat all day meant things got slower and muddier by the afternoon. Now each skill does its work separately and hands back just the result. Stay in one chat from morning planning through end-of-day review without penalty.
 
 **Command safety guard.** A protective layer that silently watches every terminal command and blocks catastrophic ones before they execute. Disk wipes, force pushes to main, repo deletions — all stopped instantly. Normal commands pass through with zero overhead. You never notice it until the one time it saves you.
 
-**Smarter infrastructure under the hood.** MCP tool descriptions now load on-demand instead of all at once — sessions with 12+ background services start faster and use less memory. Quick operations like `/triage` and inbox processing are tuned for speed over deep reasoning — routing decisions that used to take 8 seconds now feel instant.
+**Faster startup and routing.** Background services start faster and use less memory. Quick operations like `/triage` and inbox processing are tuned for speed — routing decisions that used to take 8 seconds now feel instant.
 
 ---
 
-### Skills That Take Care of Themselves
+### 🤖 Skills That Take Care of Themselves
 
 - **Meeting processing** — whenever meetings are processed, every person mentioned gets the meeting added to their page. Their history stays current without you lifting a finger.
 - **Career coaching** — when `/career-coach` surfaces achievements with real metrics, it automatically logs them to your Career Evidence file. Come review season, the evidence is already collected.
@@ -128,7 +128,7 @@ This is the biggest single release since semantic search. Dex remembers things n
 
 ---
 
-### New Guides
+### 📚 New Guides
 
 Named Sessions (resume project conversations with full history), Background Processing (which skills support it and how), Memory Ownership (how Dex's four memory layers work together), and Vault Maintenance (scan for stale files, broken links, orphaned pages).
 
