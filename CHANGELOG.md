@@ -7,21 +7,7 @@ All notable changes to Dex will be documented in this file.
 
 ---
 
-## [1.15.0] — Another Brain Upgrade (2026-02-19)
-
-Four updates that make Dex smarter about you and faster at finding what matters.
-
-**Skill Quality Signals.** After key workflows like daily plans, meeting prep, and reviews, Dex asks one optional question: "Quick rating, 1-5?" Your ratings accumulate over time. During weekly reviews, if a skill has been trending down, Dex surfaces it with context — "Your meeting prep averaged 2.8 this week, common note: missing context from last meeting." If everything's fine, you hear nothing. Ratings also feed into anonymous product analytics so Dave knows which skills to invest in.
-
-**Identity Snapshot.** Dex now automatically builds a living profile of how you actually work — your goals, priorities, task patterns, learnings, and skill ratings all feed into it. Not self-reported traits — observed patterns. What pillar gets neglected under pressure. Which skills you rate highest. Where your blind spots are. It refreshes during weekly reviews and Dex reads it when making prioritization suggestions. You can also run `/identity-snapshot` anytime to see it on demand.
-
-**Faster People Lookups.** Dex now keeps a lightweight directory of everyone you know. Instead of scanning dozens of files every time you mention someone, it reads one small index. Looking up "Paul" instantly returns the right person with their role, company, and context. The index stays fresh automatically — it rebuilds during your daily plan and self-heals if it goes stale.
-
-**Command Safety Guard.** A protective layer that silently watches every terminal command and blocks catastrophic ones before they execute. Disk wipes, force pushes to main, repo deletions — all stopped instantly. Normal commands pass through with zero overhead. You never notice it until the one time it saves you.
-
----
-
-## [1.13.0] — The Integrations Release (2026-02-19)
+## [1.15.0] — The Integrations Release (2026-02-19)
 
 This is a big one. Dex now connects to 8 tools where your real work happens — and it goes both ways. Complete a task in Dex and it's done in Todoist. Get an email flagged in your morning plan because someone hasn't replied in 3 days. See your Jira sprint status right next to your weekly priorities.
 
@@ -92,48 +78,59 @@ Dex checks whether your connected tools are healthy each time you start a sessio
 
 ---
 
-## [1.12.0] — Dex Remembers Everything Now (2026-02-19)
+## [1.14.0] — Dex Got a Brain Upgrade (2026-02-19)
 
-Five connected builds that make Dex feel like it actually knows you — not just within a session, but across sessions, across meetings, across weeks.
+This is the biggest single release since semantic search. Dex remembers things now. It gets smarter each day you use it. Sessions stay fast all day. And your skills take care of their own housekeeping instead of leaving it to you.
 
 ---
+
+### Memory
 
 **Cross-session memory.** When you start a new chat, Dex now opens with context from previous sessions — what you decided, what's been escalating, what commitments are due. No more re-explaining where you left off. Your daily plan opens with "Based on previous sessions: you discussed Acme Corp 3 times last week, decided to move to negotiation, and Sarah committed to send pricing by Friday — that's today." That context was invisible before. Now it's automatic.
 
+**Critical decisions persist.** When you make an important decision in a session — "decided to move Acme to negotiation by March" — it now survives across sessions. Critical decisions appear at every session start for 30 days, so you never lose track of what you committed to.
+
 **Meeting cache.** Every meeting you process now gets cached as a 50-token structured summary instead of a 2,000-token full note. Meeting prep and daily planning are dramatically faster — same intelligence, fraction of the token cost.
+
+**Memory that compounds.** The six agents that power your morning intelligence — deals, commitments, people, projects, focus, and pillar balance — now remember what they found in previous sessions. First run, they scan everything. Second run, they know what they already told you. Resolved items quietly drop off. New issues are clearly marked. And things you've been ignoring? Dex notices. "I've flagged this three sessions running. Still no action. This is a pattern, not a blip."
+
+**Faster people lookups.** Dex now keeps a lightweight directory of everyone you know. Instead of scanning dozens of files every time you mention someone, it reads one small index. Looking up "Paul" instantly returns the right person with their role, company, and context. The index stays fresh automatically — it rebuilds during your daily plan and self-heals if it goes stale.
+
+**Memory ownership, clarified.** With multiple memory layers now active, Dave has documented exactly what owns what. Claude's built-in memory handles your preferences and communication style. Dex's memory handles your work — who said what in which meeting, what you committed to, which deals need attention. They stack, not compete. See the new Memory Ownership guide in your Dex System docs.
+
+---
+
+### Intelligence
 
 **Pattern detection.** After 2+ weeks of use, Dex starts noticing your patterns. "You've prepped for deal calls 8 times this month but checked MEDDPICC gaps only twice." Recurring mistakes get surfaced before you make them. Emerging workflows get noticed so you can turn them into skills.
 
-**Critical decisions persist.** When you make an important decision in a session — "decided to move Acme to negotiation by March" — it now survives across sessions. Critical decisions appear at every session start for 30 days, so you never lose track of what you committed to.
+**Identity snapshot.** Dex now automatically builds a living profile of how you actually work — your goals, priorities, task patterns, learnings, and skill ratings all feed into it. Not self-reported traits — observed patterns. What pillar gets neglected under pressure. Which skills you rate highest. Where your blind spots are. It refreshes during weekly reviews and Dex reads it when making prioritization suggestions. You can also run `/identity-snapshot` anytime to see it on demand.
+
+**Skill quality signals.** After key workflows like daily plans, meeting prep, and reviews, Dex asks one optional question: "Quick rating, 1-5?" Your ratings accumulate over time. During weekly reviews, if a skill has been trending down, Dex surfaces it with context — "Your meeting prep averaged 2.8 this week, common note: missing context from last meeting." If everything's fine, you hear nothing. Ratings also feed into anonymous product analytics so Dave knows which skills to invest in.
 
 ---
 
-## [1.11.0] - 2026-02-19
+### Performance & Safety
 
-### 🧠 Dex Got a Brain Upgrade
+**Sessions that last all day.** Your heaviest skills — daily plan, weekly review, meeting prep, and seven others — now run in isolated context. Previously, running `/daily-plan` loaded thousands of tokens of working data into your chat. If you stayed in that conversation for the rest of the day, everything got slower and muddier. Now each skill runs in its own space, does its work, and hands back just the result. Stay in one chat from morning planning through end-of-day review without penalty.
 
-This is the biggest single release since semantic search. I spent some time catching up on the full Claude Code release log from the last two months — persistent memory, isolated skill contexts, smarter tool discovery, faster responses — and went through everything with Dex to make sure it's all brought in where it's relevant.
+**Command safety guard.** A protective layer that silently watches every terminal command and blocks catastrophic ones before they execute. Disk wipes, force pushes to main, repo deletions — all stopped instantly. Normal commands pass through with zero overhead. You never notice it until the one time it saves you.
 
-The short version: Dex remembers things now. It gets smarter each day you use it. Sessions stay fast all day. And your skills take care of their own housekeeping instead of leaving it to you.
+**Smarter infrastructure under the hood.** MCP tool descriptions now load on-demand instead of all at once — sessions with 12+ background services start faster and use less memory. Quick operations like `/triage` and inbox processing are tuned for speed over deep reasoning — routing decisions that used to take 8 seconds now feel instant.
 
 ---
 
-**Memory that compounds.** The six agents that power your morning intelligence — deals, commitments, people, projects, focus, and pillar balance — now remember what they found in previous sessions. First run, they scan everything. Second run, they know what they already told you. Resolved items quietly drop off. New issues are clearly marked. And things you've been ignoring? Dex notices. "I've flagged this three sessions running. Still no action. This is a pattern, not a blip." It's the difference between a daily briefing that repeats itself and one that holds you accountable.
+### Skills That Take Care of Themselves
 
-**Sessions that last all day.** Your heaviest skills — daily plan, weekly review, meeting prep, and seven others — now run in isolated context. Previously, running `/daily-plan` loaded thousands of tokens of working data into your chat. If you stayed in that conversation for the rest of the day, everything got slower and muddier. Starting a fresh chat avoided it, but you shouldn't have to think about that. Now each skill runs in its own space, does its work, and hands back just the result. Stay in one chat from morning planning through end-of-day review without penalty.
-
-**Skills that take care of themselves.** Three skills now carry their own automation:
-- **Meeting processing** — whenever meetings are processed, whether you run `/process-meetings` or they sync automatically from Granola, every person mentioned gets the meeting added to their page. Their history stays current without you lifting a finger.
+- **Meeting processing** — whenever meetings are processed, every person mentioned gets the meeting added to their page. Their history stays current without you lifting a finger.
 - **Career coaching** — when `/career-coach` surfaces achievements with real metrics, it automatically logs them to your Career Evidence file. Come review season, the evidence is already collected.
 - **Daily planning** — after your plan generates, a condensed quickref appears with just your top focus items, key meetings, and time blocks. Glanceable during the day.
 
-**Smarter infrastructure under the hood.** MCP tool descriptions now load on-demand instead of all at once — sessions with 12+ background services start faster and use less memory. OAuth for MCP integrations like Slack comes pre-configured, making future integrations simpler to set up. Quick operations like `/triage` and inbox processing are tuned for speed over deep reasoning — routing decisions that used to take 8 seconds now feel instant.
+---
 
-**Memory ownership, clarified.** With multiple memory layers now active, Dave has documented exactly what owns what. Claude's built-in memory handles your preferences and communication style — formatting choices, how you like summaries structured, your tone preferences. Dex's memory handles your work — who said what in which meeting, what you committed to, which deals need attention. They stack, not compete. See the new Memory Ownership guide in your Dex System docs.
+### New Guides
 
-**New guides:** Named Sessions (resume project conversations with full history), Background Processing (which skills support it and how), and Memory Ownership (how Dex's four memory layers work together).
-
-**Vault maintenance.** A new health check tool scans for stale inbox files, broken links between notes, and orphaned person pages. Ask Dex to "run vault maintenance" and it handles the rest.
+Named Sessions (resume project conversations with full history), Background Processing (which skills support it and how), Memory Ownership (how Dex's four memory layers work together), and Vault Maintenance (scan for stale files, broken links, orphaned pages).
 
 ---
 
@@ -145,7 +142,7 @@ This is the first time Dex has received contributions from the community, and I'
 
 **@fonto — Tasks no longer get mixed up.** Every task in Dex gets a short reference number (like the `003` at the end of a task). Previously, that number could accidentally be the same for tasks created on different days — so when you said "mark 003 as done", Dex might match the wrong one. Now every task gets a number that's unique across your entire vault. No more mix-ups.
 
-**@acottrell — "How do I connect my Google Calendar?" answered.** If you use Google Calendar on a Mac, you probably wondered how to get your meetings into Dex. The answer turns out to be surprisingly simple — add your Google account to Apple's Calendar app (the one already on your Mac), then let Cursor access it. Two steps, no accounts to create, no passwords to enter anywhere. @acottrell wrote this up as a clear guide so nobody else has to figure it out from scratch. Even better — your calendar now asks for permission automatically the first time you need it, instead of requiring a separate setup step. (And thank you for the kind words about the project.)
+**@acottrell — "How do I connect my Google Calendar?" answered.** If you use Google Calendar on a Mac, you probably wondered how to get your meetings into Dex. The answer turns out to be surprisingly simple — add your Google account to Apple's Calendar app (the one already on your Mac), then let Cursor access it. Two steps, no accounts to create, no passwords to enter anywhere. @acottrell wrote this up as a clear guide so nobody else has to figure it out from scratch. Even better — your calendar now asks for permission automatically the first time you need it, instead of requiring a separate setup step.
 
 **@mekuhl — Capture tasks from your phone with Siri.** This is the big one. You're in a meeting, someone asks you to do something, and you don't want to open your laptop. Now you can just say:
 
@@ -153,7 +150,7 @@ This is the first time Dex has received contributions from the community, and I'
 
 That's it. Siri adds it to a Reminders list on your phone called "Dex Inbox." Next morning when you run `/daily-plan`, Dex finds it and asks you to triage it — assign a pillar, set the priority, and it becomes a proper task in your vault. The Reminder disappears from your phone automatically.
 
-It works the other direction too. After your daily plan generates, your most important focus tasks appear on your phone as Reminders with notifications. So throughout the day, your phone reminds you about the things Dex thinks matter most. Complete something on your phone? Dex picks that up during your evening review. Complete it in Dex? The phone notification clears itself.
+It works the other direction too. After your daily plan generates, your most important focus tasks appear on your phone as Reminders with notifications. Complete something on your phone? Dex picks that up during your evening review. Complete it in Dex? The phone notification clears itself.
 
 Your phone and your vault stay in sync — without opening a laptop, without any new apps, without any setup beyond saying "Hey Siri" for the first time.
 
