@@ -87,6 +87,15 @@ try:
 except ImportError:
     _HAS_HEALTH = False
 
+# Timezone-aware date/time (respects user-profile.yaml timezone)
+try:
+    from core.utils.timezone import now as _tz_now, today as _tz_today
+except ImportError:
+    def _tz_now():
+        return datetime.now()
+    def _tz_today():
+        return date.today()
+
 # Custom JSON encoder for handling date/datetime objects
 class DateTimeEncoder(json.JSONEncoder):
     def default(self, obj):
@@ -322,7 +331,7 @@ def guess_priority(item: str) -> str:
 
 def generate_task_id() -> str:
     """Generate a unique task ID in format: task-YYYYMMDD-XXX"""
-    date_str = datetime.now().strftime('%Y%m%d')
+    date_str = _tz_now().strftime('%Y%m%d')
     
     # Find existing task IDs for today to get next sequential number
     existing_ids = []
@@ -383,7 +392,7 @@ def update_task_status_everywhere(task_id: str, completed: bool) -> Dict[str, An
         }
     
     updated_files = []
-    completion_timestamp = datetime.now().strftime('%Y-%m-%d %H:%M')
+    completion_timestamp = _tz_now().strftime('%Y-%m-%d %H:%M')
     
     for instance in instances:
         try:
@@ -597,7 +606,7 @@ def update_related_tasks_section(page_path: str, tasks: List[Dict[str, Any]]) ->
         return False
     
     content = filepath.read_text()
-    timestamp = datetime.now().strftime('%Y-%m-%d %H:%M')
+    timestamp = _tz_now().strftime('%Y-%m-%d %H:%M')
     
     # Build the new Related Tasks section
     section_content = f"## Related Tasks\n*Synced from 03-Tasks/Tasks.md — {timestamp}*\n\n"
@@ -830,7 +839,7 @@ def refresh_company_page(company_path: str) -> Dict[str, Any]:
     # Find related tasks
     tasks = find_tasks_for_page(company_path)
     
-    timestamp = datetime.now().strftime('%Y-%m-%d %H:%M')
+    timestamp = _tz_now().strftime('%Y-%m-%d %H:%M')
     
     # Build Key Contacts section
     contacts_section = "## Key Contacts\n\n"
@@ -966,7 +975,7 @@ def create_company_page(name: str, website: str = '', industry: str = '',
     
     domains_str = ', '.join(domains) if domains else '{{company.com}}'
     
-    timestamp = datetime.now().strftime('%Y-%m-%d')
+    timestamp = _tz_now().strftime('%Y-%m-%d')
     
     content = f"""# {name}
 
@@ -1048,7 +1057,7 @@ def create_company_page(name: str, website: str = '', industry: str = '',
 def get_quarter_info(quarter_date: Optional[date] = None) -> Dict[str, Any]:
     """Calculate quarter information based on q1_start_month from user profile"""
     if quarter_date is None:
-        quarter_date = date.today()
+        quarter_date = _tz_today()
     
     # Read q1_start_month from user profile
     q1_start_month = 1  # Default to January
@@ -1092,7 +1101,7 @@ def get_quarter_info(quarter_date: Optional[date] = None) -> Dict[str, Any]:
         'year': year,
         'start_date': quarter_start,
         'end_date': quarter_end,
-        'weeks_remaining': ((quarter_end - date.today()).days // 7) if quarter_end >= date.today() else 0
+        'weeks_remaining': ((quarter_end - _tz_today()).days // 7) if quarter_end >= _tz_today() else 0
     }
 
 def generate_goal_id(quarter: str, existing_goals: List[Dict]) -> str:
@@ -1100,7 +1109,7 @@ def generate_goal_id(quarter: str, existing_goals: List[Dict]) -> str:
     # Extract quarter and year from quarter string like "Q1 2026"
     parts = quarter.split()
     q_num = parts[0]  # e.g., "Q1"
-    year = parts[1] if len(parts) > 1 else str(date.today().year)
+    year = parts[1] if len(parts) > 1 else str(_tz_today().year)
     
     # Find highest existing goal number for this quarter
     max_num = 0
@@ -1337,7 +1346,7 @@ def create_quarterly_goal_in_file(goal_data: Dict[str, Any]) -> Dict[str, Any]:
 quarter: {quarter_info['quarter']}
 start_date: {quarter_info['start_date']}
 end_date: {quarter_info['end_date']}
-created: {datetime.now().strftime('%Y-%m-%d')}
+created: {_tz_now().strftime('%Y-%m-%d')}
 ---
 
 # {quarter_info['quarter']} Goals
@@ -1839,7 +1848,7 @@ def migrate_weekly_priorities() -> Dict[str, Any]:
     if week_match:
         week_date = datetime.strptime(week_match.group(1), '%Y-%m-%d').date()
     else:
-        today = date.today()
+        today = _tz_today()
         week_date = today - timedelta(days=today.weekday())
     
     # Parse existing priorities
@@ -1939,7 +1948,7 @@ def classify_all_tasks_effort(tasks: List[Dict]) -> List[Dict]:
 
 def get_week_progress_data() -> Dict[str, Any]:
     """Get comprehensive progress data for the current week"""
-    today = date.today()
+    today = _tz_today()
     week_start = today - timedelta(days=today.weekday())  # Monday
     week_end = week_start + timedelta(days=6)  # Sunday
     day_of_week = today.strftime('%A')
@@ -2232,7 +2241,7 @@ def extract_commitments_from_text(text: str, source: str = '', date_context: str
 
 def get_commitments_due_data(date_range: str = 'today') -> Dict[str, Any]:
     """Scan meeting notes and person pages for commitments due"""
-    today = date.today()
+    today = _tz_today()
     
     result = {
         'commitments_due_today': [],
@@ -2380,7 +2389,7 @@ def get_calendar_capacity_data(days_ahead: int = 5) -> Dict[str, Any]:
     The skill should call the calendar MCP first, then pass events to this.
     For now, returns structure for manual population.
     """
-    today = date.today()
+    today = _tz_today()
     
     result = {
         'analysis_date': today.isoformat(),
@@ -3258,7 +3267,7 @@ async def _handle_call_tool_inner(
                 alerts.append(f"{priority} has {count} tasks (limit: {limit})")
         
         # Time insights
-        now = datetime.now()
+        now = _tz_now()
         hour = now.hour
         time_insights = []
         if 6 <= hour < 12:
@@ -3626,7 +3635,7 @@ async def _handle_call_tool_inner(
             "goal_id": goal_id,
             "progress": progress_pct,
             "notes": notes,
-            "updated_at": datetime.now().isoformat()
+            "updated_at": _tz_now().isoformat()
         }
         return [types.TextContent(type="text", text=json.dumps(result, indent=2, cls=DateTimeEncoder))]
     
@@ -3648,7 +3657,7 @@ async def _handle_call_tool_inner(
         if week_date_str:
             week_date = datetime.strptime(week_date_str, '%Y-%m-%d').date()
         else:
-            today = date.today()
+            today = _tz_today()
             week_date = today - timedelta(days=today.weekday())  # Monday of current week
         
         # ---- GOAL INFERENCE ----
@@ -3759,7 +3768,7 @@ async def _handle_call_tool_inner(
         if week_date_str:
             week_date = datetime.strptime(week_date_str, '%Y-%m-%d').date()
         else:
-            today = date.today()
+            today = _tz_today()
             week_date = today - timedelta(days=today.weekday())
         
         # Parse priorities
@@ -4154,7 +4163,7 @@ async def _handle_call_tool_inner(
         
         # If events provided, analyze them; otherwise return structure for manual use
         if events:
-            today = date.today()
+            today = _tz_today()
             days_data = []
             
             # Group events by date
@@ -4216,7 +4225,7 @@ async def _handle_call_tool_inner(
         
         # Get calendar capacity (use events if provided, otherwise use basic structure)
         if calendar_events:
-            today = date.today()
+            today = _tz_today()
             days_data = []
             
             events_by_date = {}

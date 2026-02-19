@@ -45,6 +45,17 @@ try:
 except ImportError:
     _HAS_HEALTH = False
 
+# Timezone-aware date/time (respects user-profile.yaml timezone)
+try:
+    import sys as _sys2
+    _sys2.path.insert(0, str(Path(__file__).parent.parent.parent))
+    from core.utils.timezone import now as _tz_now, today as _tz_today
+except ImportError:
+    def _tz_now():
+        return datetime.now()
+    def _tz_today():
+        return datetime.now().date()
+
 # Set up logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -511,7 +522,7 @@ async def _handle_call_tool_inner(
     
     elif name == "calendar_get_events":
         calendar_name = arguments.get("calendar_name", DEFAULT_WORK_CALENDAR)
-        start_date = arguments.get("start_date", datetime.now().strftime("%Y-%m-%d"))
+        start_date = arguments.get("start_date", _tz_now().strftime("%Y-%m-%d"))
         
         # Parse start date
         start_dt = datetime.strptime(start_date, "%Y-%m-%d")
@@ -523,9 +534,9 @@ async def _handle_call_tool_inner(
             end_dt = start_dt + timedelta(days=1)
         
         # Calculate days offset from today for EventKit
-        today = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
-        start_offset = (start_dt - today).days
-        end_offset = (end_dt - today).days
+        today_dt = datetime.combine(_tz_today(), datetime.min.time())
+        start_offset = (start_dt - today_dt).days
+        end_offset = (end_dt - today_dt).days
         
         # Use fast EventKit Python script (replaces slow AppleScript)
         success, output = run_shell_script(
@@ -570,7 +581,7 @@ async def _handle_call_tool_inner(
     
     elif name == "calendar_get_today":
         calendar_name = arguments.get("calendar_name", DEFAULT_WORK_CALENDAR)
-        today = datetime.now().strftime("%Y-%m-%d")
+        today = _tz_now().strftime("%Y-%m-%d")
         
         # Reuse get_events logic
         arguments = {"calendar_name": calendar_name, "start_date": today}
@@ -667,8 +678,8 @@ async def _handle_call_tool_inner(
                 "error": f"Invalid date format. Use 'YYYY-MM-DD', got: {event_date}"
             }, indent=2))]
         
-        today = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
-        day_offset = (target_dt - today).days
+        today_dt = datetime.combine(_tz_today(), datetime.min.time())
+        day_offset = (target_dt - today_dt).days
         
         success, output = run_shell_script(
             "calendar_delete_event.sh",
@@ -718,7 +729,7 @@ async def _handle_call_tool_inner(
     
     elif name == "calendar_get_events_with_attendees":
         calendar_name = arguments.get("calendar_name", DEFAULT_WORK_CALENDAR)
-        start_date = arguments.get("start_date", datetime.now().strftime("%Y-%m-%d"))
+        start_date = arguments.get("start_date", _tz_now().strftime("%Y-%m-%d"))
         
         start_dt = datetime.strptime(start_date, "%Y-%m-%d")
         if "end_date" in arguments:
@@ -726,9 +737,9 @@ async def _handle_call_tool_inner(
         else:
             end_dt = start_dt + timedelta(days=1)
         
-        today = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
-        start_offset = (start_dt - today).days
-        end_offset = (end_dt - today).days
+        today_dt = datetime.combine(_tz_today(), datetime.min.time())
+        start_offset = (start_dt - today_dt).days
+        end_offset = (end_dt - today_dt).days
         
         # Use fast EventKit with attendee details
         success, output = run_shell_script(
