@@ -27,6 +27,7 @@ Dex/
 │   ├── Companies/            # External organizations (universal)
 │   ├── Career/               # Career development (via /career-setup)
 │   └── [Role-specific]/     # Accounts/, Team/, Content/, etc.
+├── 05-Resources/                # Context for daily plans (checklists, one-pagers, links)
 ├── 06-Resources/                # Reference material
 │   ├── Dex_System/           # System documentation
 │   ├── Learnings/            # Compound knowledge
@@ -110,6 +111,12 @@ Created via `/career-setup` command:
 **Key distinction:**  
 Area = ongoing ("Manage customer relationships")  
 Project = has an end ("Onboard Acme Corp")
+
+---
+
+## 05-Resources/
+
+**Context to incorporate into your daily plan:** checklists, one-pagers, links, or short docs you want surfaced when running `/daily-plan`. Use it for reusable prep checklists, key reminders, or decision criteria that should inform planning. See the folder’s README for details.
 
 ---
 
